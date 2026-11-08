@@ -41,6 +41,81 @@ php artisan boost:install
 
 Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
 
+## Growlytics — SSE Data Ingestion
+
+Growlytics collects real-time Growtopia marketplace listings from an external
+Server-Sent Events (SSE) endpoint and stores them for later price analytics.
+
+### Configuration
+
+Set the stream endpoint in `.env` (already wired through `config/services.php`):
+
+```env
+GROWLYTICS_STREAM_URL=https://example.com/stream
+```
+
+Optional tuning (defaults shown):
+
+```env
+# GROWLYTICS_STREAM_CONNECT_TIMEOUT=15   # seconds to establish the connection
+# GROWLYTICS_STREAM_READ_TIMEOUT=60     # seconds of stream inactivity before reconnecting
+# GROWLYTICS_STREAM_RETRY_DELAY=5       # base reconnect backoff (seconds)
+# GROWLYTICS_STREAM_MAX_RETRY_DELAY=60  # backoff ceiling (seconds)
+# GROWLYTICS_STREAM_MAX_EVENT_SIZE=65536  # bytes; larger SSE events are dropped
+```
+
+### Running the ingestion
+
+```bash
+# Apply the items/listings schema
+php artisan migrate
+
+# Start the long-lived SSE listener
+php artisan growlytics:stream
+
+# Show per-listing console output (saved / duplicate / rejected)
+php artisan growlytics:stream -v
+
+# Process exactly one connection cycle then exit (debugging / tests)
+php artisan growlytics:stream --once
+```
+
+The command reconnects automatically with bounded exponential backoff (plus
+jitter and any server `retry:` hint), resends the SSE `Last-Event-ID` header on
+reconnect when one was seen, and exits immediately on permanent HTTP errors
+(401/403/404). Run it under a supervisor (e.g. systemd or Supervisor) in
+production.
+
+### How duplicates are prevented
+
+Every event's JSON `id` is stored as `listings.external_id`, which has a unique
+index. An ingest runs inside a transaction; if the insert hits the unique
+constraint (either a fast repeat from the stream or a race with another
+process), the existing row is left untouched and the event is reported as a
+duplicate. Historical records are never overwritten or aggregated.
+
+### Known limitations
+
+- The source may not support replay: if it ignores `Last-Event-ID`, events
+  posted while the listener was disconnected are lost.
+- The SSE `id:` field is tracked for resume purposes only; the listing's
+  `external_id` always comes from the JSON payload.
+- Graceful SIGTERM/SIGINT shutdown requires PCNTL (not available on Windows);
+  elsewhere Ctrl+C terminates the process directly.
+- `priceWl` is stored as an integer; fractional or negative prices are rejected
+  and logged, never rounded.
+- UTC storage assumes `APP_TIMEZONE` remains its default `UTC`.
+
+### Tests
+
+```bash
+php artisan test
+```
+
+The suite covers ingestion, normalization, duplicate handling, timestamp
+precision, malformed payload rejection, and SSE parsing (heartbeats, partial
+chunks, CRLF) using fakes only — no access to the real stream is required.
+
 ## Contributing
 
 Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).

@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'growlytics' => [
+        'stream_url' => env('GROWLYTICS_STREAM_URL'),
+        'connect_timeout' => env('GROWLYTICS_STREAM_CONNECT_TIMEOUT', 15),
+        'read_timeout' => env('GROWLYTICS_STREAM_READ_TIMEOUT', 60),
+        'retry_delay' => env('GROWLYTICS_STREAM_RETRY_DELAY', 5),
+        'max_retry_delay' => env('GROWLYTICS_STREAM_MAX_RETRY_DELAY', 60),
+        'max_event_size' => env('GROWLYTICS_STREAM_MAX_EVENT_SIZE', 65536),
+    ],
+
 ];
