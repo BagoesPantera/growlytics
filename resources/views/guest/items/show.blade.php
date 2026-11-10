@@ -4,6 +4,12 @@
 
 @section('content')
     <section class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="mb-4">
+            <a href="{{ $backUrl ?? route('home.index') }}" class="inline-flex items-center gap-2 rounded-full border border-[#E4EAF0] bg-white px-4 py-2 text-sm font-semibold text-[#172B44] transition hover:border-[#58CC45] hover:text-[#58CC45] focus:outline-none focus:ring-2 focus:ring-[#58CC45] focus:ring-offset-2">
+                <span aria-hidden="true">←</span>
+                Back to Items
+            </a>
+        </div>
         <nav class="text-sm text-gray-500">
             <a href="{{ route('home.index') }}" class="hover:text-[#58CC45]">Home</a>
             <span class="mx-2">/</span>

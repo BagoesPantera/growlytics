@@ -18,7 +18,7 @@ class ItemController extends Controller
         private ItemRecentWorldListingsService $recentWorlds,
     ) {}
 
-    public function show(string $item)
+    public function show(string $item, Request $request)
     {
         $resolved = $this->resolveItem($item);
 
@@ -30,7 +30,56 @@ class ItemController extends Controller
 
         return view('guest.items.show', [
             'item' => $resolved,
+            'backUrl' => $this->safeBackUrl($request),
         ]);
+    }
+
+    private function safeBackUrl(Request $request): string
+    {
+        foreach (['from', 'return', 'return_url', 'back', 'redirect', 'previous'] as $key) {
+            $candidate = $request->query($key);
+
+            if (is_string($candidate) && $this->isSafeInternalUrl($candidate, $request)) {
+                return $candidate;
+            }
+        }
+
+        $referer = $request->headers->get('referer');
+
+        if (is_string($referer) && $this->isSafeInternalUrl($referer, $request)) {
+            return $referer;
+        }
+
+        return route('home.index');
+    }
+
+    private function isSafeInternalUrl(?string $url, Request $request): bool
+    {
+        if (! is_string($url) || trim($url) === '') {
+            return false;
+        }
+
+        $url = trim($url);
+
+        if (str_starts_with($url, '/') && ! str_starts_with($url, '//')) {
+            return true;
+        }
+
+        $parsed = parse_url($url);
+
+        if ($parsed === false || empty($parsed['host'])) {
+            return false;
+        }
+
+        if (! in_array($parsed['scheme'] ?? 'https', ['http', 'https'], true)) {
+            return false;
+        }
+
+        if ($parsed['host'] !== $request->getHost()) {
+            return false;
+        }
+
+        return true;
     }
 
     public function search(Request $request): JsonResponse
