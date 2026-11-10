@@ -1,133 +1,231 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Growlytics
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Growlytics is a Laravel application that collects Growtopia marketplace listings from an external Server-Sent Events (SSE) stream and stores historical pricing data for item price history, buy/sell listing statistics, average advertised prices, marketplace trends, and analytics dashboards.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Implemented
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- SSE listener command with automatic reconnection and graceful shutdown.
+- Listing ingestion with payload validation, item normalization, duplicate prevention, and UTC timestamp parsing.
+- `items` and `listings` schema with indexes for item/side/time and price lookups.
+- Bootstrap-based admin dashboard shell (Velzon-style template) under the `/app` prefix.
+- Laravel Breeze authentication and profile management.
+- PHPUnit feature/unit tests for ingestion, normalization, duplicate handling, timestamp precision, malformed payloads, and SSE parsing.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Planned
 
-## Learning Laravel
+- Public Growlytics frontend pages.
+- Price history and trend charts.
+- Buy/sell statistics and average advertised price analytics.
+- Item search and filtering.
+- Admin analytics dashboards.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Technology Stack
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP ^8.3 (verified on PHP 8.4.27)
+- Laravel Framework 13.40.0
+- MySQL for application data; SQLite in-memory for tests
+- Laravel Breeze for authentication scaffolding
+- Laravel Boost for AI-assisted development
+- Bootstrap 5.3.6 for the admin dashboard (precompiled assets under `public/apps/`)
+- Tailwind CSS v3 + Alpine.js for the default Laravel/Breeze starter pages through Vite
+- Vite 8 for frontend bundling of Tailwind-based pages
+- Guzzle/HTTP client for the SSE stream
+- PHPUnit 12 for testing
+- Laravel Pint for code style
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+The admin dashboard is Bootstrap-based. Tailwind is only used by the default Laravel/Breeze views and must not be introduced into admin pages.
 
-## Agentic Development
+## Project Structure
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+```text
+app/
+  Console/Commands/StreamGrowtopiaListings.php
+  Http/Controllers/Apps/        # Admin controllers
+  Http/Controllers/Guest/       # Public controllers
+  Http/Middleware/RoleMiddleware.php
+  Models/Item.php, Listing.php, User.php
+  Services/ListingIngestService.php, SseParser.php, SseEvent.php
+  Helpers/helpers.php           # versioned_asset, guest_asset, upload_asset, getSetting
+config/services.php             # growlytics stream settings
+database/migrations/            # items, listings, users + role
+resources/views/
+  apps/layouts/master.blade.php # Bootstrap admin layout
+  layouts/app.blade.php         # Tailwind authenticated layout
+  layouts/guest.blade.php       # Tailwind guest/public layout
+routes/web.php                  # wires auth profile, apps, guest
+routes/web/apps.php             # /app admin routes
+routes/web/guest.php            # public routes
+tests/Feature/ListingIngestServiceTest.php
+tests/Feature/GrowlyticsStreamCommandTest.php
+tests/Unit/SseParserTest.php
+```
+
+## Requirements
+
+- PHP 8.3 or newer
+- Composer
+- MySQL (or another Laravel-supported database)
+- Node.js and npm, only needed to build Tailwind/Vite assets for default Laravel pages
+- cPanel-compatible PHP CLI for deployment
+
+## Installation
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+cp .env.example .env
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Growlytics — SSE Data Ingestion
-
-Growlytics collects real-time Growtopia marketplace listings from an external
-Server-Sent Events (SSE) endpoint and stores them for later price analytics.
-
-### Configuration
-
-Set the stream endpoint in `.env` (already wired through `config/services.php`):
-
-```env
-GROWLYTICS_STREAM_URL=https://example.com/stream
-```
-
-Optional tuning (defaults shown):
-
-```env
-# GROWLYTICS_STREAM_CONNECT_TIMEOUT=15   # seconds to establish the connection
-# GROWLYTICS_STREAM_READ_TIMEOUT=60     # seconds of stream inactivity before reconnecting
-# GROWLYTICS_STREAM_RETRY_DELAY=5       # base reconnect backoff (seconds)
-# GROWLYTICS_STREAM_MAX_RETRY_DELAY=60  # backoff ceiling (seconds)
-# GROWLYTICS_STREAM_MAX_EVENT_SIZE=65536  # bytes; larger SSE events are dropped
-```
-
-### Running the ingestion
+Configure database credentials in `.env`, then:
 
 ```bash
-# Apply the items/listings schema
 php artisan migrate
+npm install
+npm run build
+php artisan serve
+```
 
-# Start the long-lived SSE listener
+The admin Bootstrap assets are already compiled under `public/apps/`; `npm run build` is needed for the Tailwind/Vite pages.
+
+## Environment Configuration
+
+Relevant variables from `.env.example`:
+
+```env
+APP_NAME="Growlytics"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=laravel
+DB_USERNAME=root
+DB_PASSWORD=
+
+GROWLYTICS_STREAM_URL=
+# GROWLYTICS_STREAM_CONNECT_TIMEOUT=15
+# GROWLYTICS_STREAM_READ_TIMEOUT=60
+# GROWLYTICS_STREAM_RETRY_DELAY=5
+# GROWLYTICS_STREAM_MAX_RETRY_DELAY=60
+# GROWLYTICS_STREAM_MAX_EVENT_SIZE=65536
+
+VITE_APP_NAME="${APP_NAME}"
+```
+
+Do not commit real `.env` values or credentials.
+
+## Database
+
+### items
+
+- `id`
+- `name`
+- `normalized_name` (unique)
+- `created_at`, `updated_at`
+
+### listings
+
+- `id`
+- `external_id` (unique, max 64 chars)
+- `item_id` (foreign key, `restrictOnDelete`)
+- `side` (`buy` or `sell`)
+- `price_wl` (unsigned integer)
+- `server`, `channel` (nullable)
+- `world` (nullable, max 100)
+- `world_verified` (boolean, default false)
+- `url` (nullable text)
+- `posted_at` (timestamp with millisecond precision)
+- `created_at`, `updated_at`
+
+Indexes:
+
+- `item_id`, `side`, `posted_at`
+- `item_id`, `side`, `price_wl`
+- `posted_at`
+
+Item names are normalized by trimming, collapsing repeated whitespace, and lowercasing using Unicode-aware functions. Duplicate listings are prevented by the unique `external_id` constraint. Historical records are never overwritten or aggregated.
+
+## SSE Ingestion
+
+### How it works
+
+`php artisan growlytics:stream` opens the configured SSE endpoint and reads the response in 8192-byte chunks. Complete SSE events are parsed incrementally, JSON payloads are validated, and valid listings are persisted inside a transaction. Malformed payloads are logged and skipped. Duplicate `external_id` values are ignored without modifying the stored record. Event timestamps are converted to UTC.
+
+### Commands
+
+```bash
+php artisan migrate
 php artisan growlytics:stream
-
-# Show per-listing console output (saved / duplicate / rejected)
 php artisan growlytics:stream -v
-
-# Process exactly one connection cycle then exit (debugging / tests)
 php artisan growlytics:stream --once
 ```
 
-The command reconnects automatically with bounded exponential backoff (plus
-jitter and any server `retry:` hint), resends the SSE `Last-Event-ID` header on
-reconnect when one was seen, and exits immediately on permanent HTTP errors
-(401/403/404). Run it under a supervisor (e.g. systemd or Supervisor) in
-production.
+- `-v` shows per-listing saved, duplicate, and rejected output.
+- `--once` processes one connection cycle and exits, useful for debugging and tests.
 
-### How duplicates are prevented
+### Reconnection behavior
 
-Every event's JSON `id` is stored as `listings.external_id`, which has a unique
-index. An ingest runs inside a transaction; if the insert hits the unique
-constraint (either a fast repeat from the stream or a race with another
-process), the existing row is left untouched and the event is reported as a
-duplicate. Historical records are never overwritten or aggregated.
+- Bounded exponential backoff starts at 5 seconds and caps at 60 seconds.
+- Jitter is applied to backoff delays.
+- Server `retry:` hints are honored.
+- `Last-Event-ID` is resent on reconnect when available.
+- HTTP 401, 403, and 404 stop the command instead of retrying.
+- Unexpected content types are logged but do not stop streaming.
+
+### Debugging
+
+- Use `--once` to test one connection cycle.
+- Check Laravel logs for connection failures, malformed payloads, duplicates, and database errors.
+- Inspect the HTTP status and content type warnings for endpoint issues.
 
 ### Known limitations
 
-- The source may not support replay: if it ignores `Last-Event-ID`, events
-  posted while the listener was disconnected are lost.
-- The SSE `id:` field is tracked for resume purposes only; the listing's
-  `external_id` always comes from the JSON payload.
-- Graceful SIGTERM/SIGINT shutdown requires PCNTL (not available on Windows);
-  elsewhere Ctrl+C terminates the process directly.
-- `priceWl` is stored as an integer; fractional or negative prices are rejected
-  and logged, never rounded.
-- UTC storage assumes `APP_TIMEZONE` remains its default `UTC`.
+- The source may ignore `Last-Event-ID`; events posted during downtime can be lost.
+- Graceful SIGTERM/SIGINT shutdown requires PCNTL and is unavailable on Windows.
+- `price_wl` is an integer; fractional or negative prices are rejected, not rounded.
+- UTC storage assumes `APP_TIMEZONE` is UTC. The current config sets `Asia/Makassar`, which breaks `posted_at` round-tripping; this is a known issue and should be corrected before production use.
 
-### Tests
+## Deployment
+
+The application is intended to run on cPanel shared hosting. Do not assume Supervisor, systemd, Docker, Redis, or queue workers are available.
+
+Use a cron job with `flock` and `nohup` to keep one listener running:
+
+```cron
+*/5 * * * * /usr/bin/flock -n /home/CPANEL_USER/growlytics/stream.lock /bin/bash -c 'cd /home/CPANEL_USER/public_html/growlytics && nohup php artisan growlytics:stream >> storage/logs/growlytics-stream.log 2>&1 &'
+```
+
+Replace placeholder paths with the actual cPanel account paths. Monitor `storage/logs/` and application logs. Do not modify production cron jobs or long-running processes without permission.
+
+## Frontend Architecture
+
+- Admin pages extend `resources/views/apps/layouts/master.blade.php`.
+- The admin layout loads Bootstrap 5.3.6 and template assets from `public/apps/` through `versioned_asset()`.
+- Admin routes are grouped under `/app` with `auth` and `role:admin` middleware.
+- Public pages use `resources/views/layouts/guest.blade.php`, which is currently Tailwind-based and separate from the admin layout.
+- Default Laravel/Breeze pages use `resources/views/layouts/app.blade.php`, also Tailwind-based.
+- `App\View\Components\AppLayout` and `GuestLayout` render the Tailwind layouts, not Bootstrap.
+- `guest_asset()` is available for assets under `public/guest/`.
+
+Do not merge the admin and guest layouts or move pages between them without explicit instructions.
+
+## Testing
+
+Tests run on SQLite in-memory via `phpunit.xml`. Do not run destructive database commands against the development database.
 
 ```bash
 php artisan test
+php artisan test --filter=ListingIngestServiceTest
+php artisan test tests/Feature/GrowlyticsStreamCommandTest.php
+vendor/bin/pint --dirty --format agent
 ```
 
-The suite covers ingestion, normalization, duplicate handling, timestamp
-precision, malformed payload rejection, and SSE parsing (heartbeats, partial
-chunks, CRLF) using fakes only — no access to the real stream is required.
+Current suite: 72 tests, with one known failure caused by the `Asia/Makassar` timezone configuration.
 
-## Contributing
+## Development Guidelines
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+See `AGENTS.md` for instructions that apply to AI coding agents and contributors.
