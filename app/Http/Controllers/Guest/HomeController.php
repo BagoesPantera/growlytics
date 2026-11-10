@@ -3,16 +3,27 @@
 namespace App\Http\Controllers\Guest;
 
 use App\Http\Controllers\Controller;
+use App\Services\TopItemsThisWeekService;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
+    public function __construct(
+        private TopItemsThisWeekService $topItemsThisWeek,
+    ) {}
+
     /**
-     * Display a listing of the resource.
+     * Display the Growlytics public homepage.
      */
     public function index()
     {
-        return '';
+        $period = $this->topItemsThisWeek->currentPeriod();
+
+        return view('guest.home.index', [
+            'topItems' => $this->topItemsThisWeek->topItemsThisWeek(),
+            'weekStart' => $period['start'],
+            'weekEnd' => $period['end'],
+        ]);
     }
 
     /**
