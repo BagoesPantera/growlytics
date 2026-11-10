@@ -9,17 +9,21 @@ Growlytics is a Laravel application that collects Growtopia marketplace listings
 - SSE listener command with automatic reconnection and graceful shutdown.
 - Listing ingestion with payload validation, item normalization, duplicate prevention, and UTC timestamp parsing.
 - `items` and `listings` schema with indexes for item/side/time and price lookups.
-- Bootstrap-based admin dashboard shell (Velzon-style template) under the `/app` prefix.
+- Fractional World Lock prices stored as DECIMAL(28,8), with raw price representation preserved.
+- Permanent item slugs for stable URLs, with numeric ID fallback.
+- Bootstrap-based admin dashboard shell under the `/app` prefix (currently a placeholder).
 - Laravel Breeze authentication and profile management.
-- PHPUnit feature/unit tests for ingestion, normalization, duplicate handling, timestamp precision, malformed payloads, and SSE parsing.
+- Public guest frontend: homepage, shared item search, Top Items This Week ranking, item detail analytics, price history charts, recent sell listings by world.
+- PHPUnit feature/unit tests for ingestion, normalization, duplicate handling, timestamp precision, malformed payloads, SSE parsing, slugs, search, price history, recent worlds, and weekly ranking.
 
 ### Planned
 
-- Public Growlytics frontend pages.
-- Price history and trend charts.
-- Buy/sell statistics and average advertised price analytics.
-- Item search and filtering.
 - Admin analytics dashboards.
+- Item browsing and filtering pages beyond search.
+- Price history and trend charts polish.
+- Buy/sell statistics and average advertised price analytics expansion.
+- Public trends pages.
+- Search result pages.
 
 ## Technology Stack
 
@@ -29,48 +33,58 @@ Growlytics is a Laravel application that collects Growtopia marketplace listings
 - Laravel Breeze for authentication scaffolding
 - Laravel Boost for AI-assisted development
 - Bootstrap 5.3.6 for the admin dashboard (precompiled assets under `public/apps/`)
-- Tailwind CSS v3 + Alpine.js for the default Laravel/Breeze starter pages through Vite
-- Vite 8 for frontend bundling of Tailwind-based pages
+- Tailwind CSS v3 + Alpine.js for guest/default Laravel/Breeze pages through Vite
+- Vite 8 for frontend bundling
+- ECharts 6 for price history charts
 - Guzzle/HTTP client for the SSE stream
 - PHPUnit 12 for testing
 - Laravel Pint for code style
 
-The admin dashboard is Bootstrap-based. Tailwind is only used by the default Laravel/Breeze views and must not be introduced into admin pages.
+The admin dashboard is Bootstrap-based. Tailwind is only used by guest and default Laravel/Breeze views and must not be introduced into admin pages.
 
 ## Project Structure
 
 ```text
 app/
   Console/Commands/StreamGrowtopiaListings.php
+  Console/Commands/BackfillItemSlugs.php
   Http/Controllers/Apps/        # Admin controllers
-  Http/Controllers/Guest/       # Public controllers
+  Http/Controllers/Guest/       # Public controllers (Home, Item)
   Http/Middleware/RoleMiddleware.php
   Models/Item.php, Listing.php, User.php
   Services/ListingIngestService.php, SseParser.php, SseEvent.php
-  Helpers/helpers.php           # versioned_asset, guest_asset, upload_asset, getSetting
+  Services/TopItemsThisWeekService.php, ItemPriceHistoryService.php
+  Services/ItemRecentWorldListingsService.php, ItemSearchService.php
+  Services/ItemSlugGenerator.php
+  Helpers/helpers.php            # versioned_asset, guest_asset, upload_asset, getSetting
 config/services.php             # growlytics stream settings
-database/migrations/            # items, listings, users + role
+database/migrations/            # items, listings, users + role, slugs, decimal price
 resources/views/
   apps/layouts/master.blade.php # Bootstrap admin layout
+  apps/dashboard/index.blade.php
+  guest/layouts/master.blade.php # Tailwind guest layout
+  guest/home/index.blade.php
+  guest/items/show.blade.php
   layouts/app.blade.php         # Tailwind authenticated layout
   layouts/guest.blade.php       # Tailwind guest/public layout
 routes/web.php                  # wires auth profile, apps, guest
 routes/web/apps.php             # /app admin routes
 routes/web/guest.php            # public routes
-tests/Feature/ListingIngestServiceTest.php
-tests/Feature/GrowlyticsStreamCommandTest.php
+tests/Feature/...               # ingestion, analytics, search, slugs, auth
 tests/Unit/SseParserTest.php
 ```
 
-## Requirements
+## Admin and Guest Layout Architecture
 
-- PHP 8.3 or newer
-- Composer
-- MySQL (or another Laravel-supported database)
-- Node.js and npm, only needed to build Tailwind/Vite assets for default Laravel pages
-- cPanel-compatible PHP CLI for deployment
+- Admin pages extend `resources/views/apps/layouts/master.blade.php` and load Bootstrap assets from `public/apps/` via `versioned_asset()`.
+- Guest pages extend `resources/views/guest/layouts/master.blade.php` and use Tailwind/Alpine through Vite (`resources/css/app.css`, `resources/js/app.js`).
+- Admin routes are grouped under `/app` with `auth` and `role:admin` middleware.
+- Public routes live in `routes/web/guest.php` with no auth requirement.
+- `App\View\Components\AppLayout` and `GuestLayout` render Tailwind layouts, not Bootstrap.
+- `guest_asset()` serves assets under `public/guest/`.
+- Do not merge admin and guest layouts or move pages between them.
 
-## Installation
+## Local Installation
 
 ```bash
 composer install
@@ -87,7 +101,7 @@ npm run build
 php artisan serve
 ```
 
-The admin Bootstrap assets are already compiled under `public/apps/`; `npm run build` is needed for the Tailwind/Vite pages.
+The admin Bootstrap assets are already compiled under `public/apps/`; `npm run build` is needed for the Tailwind/Vite guest pages.
 
 ## Environment Configuration
 
@@ -118,14 +132,17 @@ VITE_APP_NAME="${APP_NAME}"
 
 Do not commit real `.env` values or credentials.
 
-## Database
+## Database Schema
 
 ### items
 
 - `id`
 - `name`
 - `normalized_name` (unique)
+- `slug` (nullable, unique)
 - `created_at`, `updated_at`
+
+Item names are normalized by trimming, collapsing repeated whitespace, and lowercasing using Unicode-aware functions.
 
 ### listings
 
@@ -134,7 +151,7 @@ Do not commit real `.env` values or credentials.
 - `item_id` (foreign key, `restrictOnDelete`)
 - `side` (`buy` or `sell`)
 - `price_wl` (non-negative DECIMAL(28,8))
-- `price_wl_raw` (nullable string, original incoming price representation)
+- `price_wl_raw` (nullable string, max 64, original incoming price representation)
 - `server`, `channel` (nullable)
 - `world` (nullable, max 100)
 - `world_verified` (boolean, default false)
@@ -143,12 +160,23 @@ Do not commit real `.env` values or credentials.
 - `created_at`, `updated_at`
 
 Indexes:
-
 - `item_id`, `side`, `posted_at`
 - `item_id`, `side`, `price_wl`
 - `posted_at`
 
-Item names are normalized by trimming, collapsing repeated whitespace, and lowercasing using Unicode-aware functions. Duplicate listings are prevented by the unique `external_id` constraint. Historical records are never overwritten or aggregated.
+Item names are normalized to prevent duplicate master records. Duplicate listings are prevented by the unique `external_id` constraint. Historical records are never overwritten or aggregated.
+
+## Fractional World Lock Price Handling
+
+- `price_wl` is DECIMAL(28,8) and non-negative.
+- Integer and fractional World Lock prices are supported.
+- Invalid, negative, NaN, infinite, and out-of-range values are rejected.
+- Decimal values are stored without floating-point conversion.
+- `price_wl_raw` preserves the incoming price representation where available.
+- BCMath (`bccomp`) is used for decimal range validation.
+- Eloquent casts `price_wl` with `decimal:8` (Brick\Math BigDecimal, HalfUp rounding to 8 decimals).
+- Validated range is 0 through 99999999999999999999.99999999.
+- Fractional inputs are accepted and never silently rounded beyond the 8-decimal column precision.
 
 ## SSE Ingestion
 
@@ -163,10 +191,13 @@ php artisan migrate
 php artisan growlytics:stream
 php artisan growlytics:stream -v
 php artisan growlytics:stream --once
+php artisan growlytics:backfill-item-slugs
+php artisan growlytics:backfill-item-slugs --batch=100 --dry-run
 ```
 
 - `-v` shows per-listing saved, duplicate, and rejected output.
 - `--once` processes one connection cycle and exits, useful for debugging and tests.
+- `growlytics:backfill-item-slugs` generates permanent slugs for items missing one; `--dry-run` reports without writing.
 
 ### Reconnection behavior
 
@@ -177,42 +208,62 @@ php artisan growlytics:stream --once
 - HTTP 401, 403, and 404 stop the command instead of retrying.
 - Unexpected content types are logged but do not stop streaming.
 
-### Debugging
-
-- Use `--once` to test one connection cycle.
-- Check Laravel logs for connection failures, malformed payloads, and database errors.
-- Inspect the HTTP status and content type warnings for endpoint issues.
-
 ### Known limitations
 
 - The source may ignore `Last-Event-ID`; events posted during downtime can be lost.
 - Graceful SIGTERM/SIGINT shutdown requires PCNTL and is unavailable on Windows.
-- `price_wl` is stored as DECIMAL(20,8) and Eloquent casts it with `decimal:8` (HalfUp rounding to 8 decimals). Fractional prices are accepted; the original incoming representation is preserved in `price_wl_raw`.
-- UTC storage assumes `APP_TIMEZONE` is UTC. The current config sets `Asia/Makassar`, which breaks `posted_at` round-tripping; this is a known issue and should be corrected before production use.
+- Application timezone is UTC (required for correct `posted_at` round-tripping).
+
+## Item Search and Detail Navigation
+
+- Shared search in the guest header queries `/search/items?q=...&limit=...` and returns up to 8 items.
+- Results link to item detail pages using permanent slugs when available, with numeric ID fallback.
+- Item detail page (`/items/{item}`) shows advertised price analytics, buy/sell summary, price history chart, and recent sell listings by world.
+- Back navigation prefers safe internal URLs and falls back to the homepage.
+- Internal database item IDs are not displayed as decorative text; slugs/IDs are used only for routing and relations.
+
+## Weekly Rankings and Analytics Time Windows
+
+- "Top Items This Week" ranks items by total listings in the current UTC calendar week (Monday 00:00 UTC to now), reset every Monday 00:00 UTC. Maximum 10 items, tie-broken by item ID.
+- Homepage ranking counts are cached with a TTL of at most 60 seconds and invalidate at the UTC Monday boundary.
+- Item detail analytics default to a rolling 24-hour UTC window and support 24H, 7D, 30D, 90D, 1Y.
+- These are intentionally different time windows; differing counts are expected behavior, not a bug.
+- Price history scatter points are sampled for display; medians and percentiles use all valid listings.
+- Recent sell listings by world use a rolling 24-hour UTC window with pagination.
+- Empty state wording: "No listings in the selected time range."
+- Statistics are based on advertised marketplace prices, not confirmed transactions.
 
 ## Deployment
 
 The application is intended to run on cPanel shared hosting. Do not assume Supervisor, systemd, Docker, Redis, or queue workers are available.
 
-Use a cron job with `flock` and `nohup` to keep one listener running:
+The SSE listener is managed using a cron watchdog pattern:
 
-```cron
-*/5 * * * * /usr/bin/flock -n /home/CPANEL_USER/growlytics/stream.lock /bin/bash -c 'cd /home/CPANEL_USER/public_html/growlytics && nohup php artisan growlytics:stream >> storage/logs/growlytics-stream.log 2>&1 &'
+```text
+cPanel Cron (every minute)
+    |
+    v
+nohup + flock
+    |
+    +-- Lock available → Start Laravel SSE listener
+    |
+    +-- Lock held → Exit without starting duplicate listener
 ```
 
-Replace placeholder paths with the actual cPanel account paths. Monitor `storage/logs/` and application logs. Do not modify production cron jobs or long-running processes without permission.
+Example (use placeholders, never real paths):
 
-## Frontend Architecture
+```bash
+cd /path/to/growlytics && nohup /bin/flock -n /path/to/growlytics.lock /path/to/php artisan growlytics:stream >> /path/to/stream.log 2>&1 < /dev/null &
+```
 
-- Admin pages extend `resources/views/apps/layouts/master.blade.php`.
-- The admin layout loads Bootstrap 5.3.6 and template assets from `public/apps/` through `versioned_asset()`.
-- Admin routes are grouped under `/app` with `auth` and `role:admin` middleware.
-- Public pages use `resources/views/layouts/guest.blade.php`, which is currently Tailwind-based and separate from the admin layout.
-- Default Laravel/Breeze pages use `resources/views/layouts/app.blade.php`, also Tailwind-based.
-- `App\View\Components\AppLayout` and `GuestLayout` render the Tailwind layouts, not Bootstrap.
-- `guest_asset()` is available for assets under `public/guest/`.
-
-Do not merge the admin and guest layouts or move pages between them without explicit instructions.
+Important deployment rules:
+- Cron checks every minute.
+- Laravel's SSE listener should continue running between cron executions.
+- `flock` prevents overlapping listeners using the same lock file.
+- Do not restart the stream intentionally every minute.
+- Do not delete the lock file to force a restart.
+- Disable the cron watchdog before manually stopping the listener for maintenance.
+- Confirm that the hosting provider permits persistent background processes.
 
 ## Testing
 
@@ -225,8 +276,27 @@ php artisan test tests/Feature/GrowlyticsStreamCommandTest.php
 vendor/bin/pint --dirty --format agent
 ```
 
-Current suite: 72 tests, with one known failure caused by the `Asia/Makassar` timezone configuration.
+Current suite: 146 tests passing.
 
-## Development Guidelines
+## Known Limitations
 
-See `AGENTS.md` for instructions that apply to AI coding agents and contributors.
+- SSE reconnect gaps: events published while disconnected may be lost.
+- PHP float precision in analytics for very large prices (beyond 2^53).
+- Extreme or unrealistic listing prices.
+- Data growth over time.
+- Differences between calendar-week ranking and rolling detail windows.
+- Admin dashboard is currently a placeholder; admin analytics not yet implemented.
+- `getSetting()` references a `Setting` model that is not present in the codebase; verify before relying on it.
+
+## Future Roadmap
+
+- Admin analytics dashboards.
+- Item browsing and filtering pages.
+- Price history and trend charts polish.
+- Buy/sell statistics and average advertised price analytics expansion.
+- Public trends pages.
+- Search result pages.
+
+## AI Agent Context
+
+See `AGENTS.md` for persistent instructions, architectural constraints, and coding conventions for AI agents.
