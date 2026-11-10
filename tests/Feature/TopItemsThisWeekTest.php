@@ -313,4 +313,36 @@ class TopItemsThisWeekTest extends TestCase
 
         $this->assertCount(0, $service->topItemsThisWeek());
     }
+
+    public function test_ranking_includes_item_slug(): void
+    {
+        $now = $this->freezeNow('2026-11-11 12:00:00');
+        $postedAt = $now->copy()->subDay();
+
+        $item = Item::factory()->create([
+            'name' => 'Slug Item',
+            'normalized_name' => 'slug item',
+            'slug' => 'slug-item-abc12',
+        ]);
+
+        Listing::factory()->create([
+            'external_id' => 'slug-item-1',
+            'item_id' => $item->id,
+            'side' => 'buy',
+            'posted_at' => $postedAt,
+        ]);
+
+        $service = app(TopItemsThisWeekService::class);
+        Cache::forget($service->cacheKey());
+
+        $items = $service->topItemsThisWeek();
+
+        $this->assertCount(1, $items);
+        $this->assertSame($item->id, $items->first()['item_id']);
+        $this->assertSame('Slug Item', $items->first()['name']);
+        $this->assertSame('slug-item-abc12', $items->first()['slug']);
+        $this->assertSame(1, $items->first()['total']);
+        $this->assertSame(1, $items->first()['buy_count']);
+        $this->assertSame(0, $items->first()['sell_count']);
+    }
 }

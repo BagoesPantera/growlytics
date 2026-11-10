@@ -1,16 +1,16 @@
 # Graph Report - growlytics  (2026-11-10)
 
 ## Corpus Check
-- 313 files · ~1,660,514 words
+- 313 files · ~1,660,582 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 5970 nodes · 14337 edges · 355 communities (306 shown, 49 thin omitted)
+- 5971 nodes · 14341 edges · 355 communities (307 shown, 48 thin omitted)
 - Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 1510 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ca5e1c4a`
+- Built from commit: `277cc941`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -19,7 +19,7 @@
 - composer.json
 - de
 - devDependencies
-- bootstrap/app.php
+- X
 - ListingIngestService
 - ItemController
 - config
@@ -38,7 +38,7 @@
 - item-detail.js
 - tn
 - index.global.min.js
-- a
+- i
 - p
 - swiper-bundle.min.js
 - moment.min.js
@@ -47,7 +47,7 @@
 - c
 - Hn
 - pi
-- U
+- Y
 - t
 - Qe
 - .constructor
@@ -61,13 +61,13 @@
 - a
 - gridjs.umd.js
 - he
-- i
+- e
 - User
 - vt
 - .bbox
 - .init
 - xt
-- .add
+- fr
 - E
 - us
 - t
@@ -75,23 +75,23 @@
 - oi
 - n
 - .getContext
-- ms
+- fo
 - sweetalert2.min.js
-- qn
+- ro
 - Sortable.min.js
 - pa
 - s
 - ho
-- z
+- Wt
 - xt
 - zt
 - dom-autoscroller.min.js
-- El
+- y
 - leaflet.js
-- localeData
+- isValid
 - getParsingFlags
 - remove
-- isValid
+- createLocal
 - c
 - dragula.min.js
 - createDuration
@@ -100,8 +100,8 @@
 - ta
 - Lt
 - _l
-- ds
-- Iw
+- r
+- U
 - quill.min.js
 - inRange
 - MaterialDesign-Webfont-7.4.47/package.json
@@ -117,7 +117,7 @@
 - TopItemsThisWeekTest
 - dn
 - Item.php
-- wi
+- hasOwnProp
 - simplebar.min.js
 - initiateExpression
 - ts
@@ -130,7 +130,7 @@
 - mailbox.init.js
 - m
 - todo.init.js
-- fn
+- Z
 - LoginRequest
 - $bm_isInstanceOfArray
 - ks
@@ -138,9 +138,9 @@
 - scripts
 - tasks-list.init.js
 - isFunction
-- yt
+- .newLine
 - st
-- n
+- A
 - calendar.init.js
 - file-manager.init.js
 - landing.init.js
@@ -173,7 +173,7 @@
 - Jt
 - rn
 - createUTC
-- kc
+- .defs
 - crm-contact.init.js
 - job-application.init.js
 - listjs.init.js
@@ -198,7 +198,7 @@
 - job-candidate-grid.init.js
 - job-candidate-lists.init.js
 - job-grid-list.init.js
-- kr
+- fn
 - ks
 - master.blade.php
 - apexcharts-column.init.js
@@ -222,8 +222,8 @@
 - i
 - layouts.navigation
 - DatabaseSeeder
-- Ut
-- keywords
+- eo
+- extra
 - rn
 
 ## God Nodes (most connected - your core abstractions)
@@ -234,7 +234,7 @@
 5. `a()` - 76 edges
 6. `o()` - 71 edges
 7. `r()` - 70 edges
-8. `Item` - 68 edges
+8. `Item` - 69 edges
 9. `c()` - 68 edges
 10. `e()` - 68 edges
 
@@ -253,7 +253,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (355 total, 49 thin omitted)
+## Communities (355 total, 48 thin omitted)
 
 ### Community 0 - "Illuminate\Database\Migrations\Migration"
 Cohesion: 0.13
@@ -261,7 +261,7 @@ Nodes (3): Illuminate\Database\Migrations\Migration, Illuminate\Database\Schema\
 
 ### Community 1 - "composer.json"
 Cohesion: 0.14
-Nodes (13): autoload-dev, psr-4, description, extra, laravel, dont-discover, license, minimum-stability (+5 more)
+Nodes (13): autoload-dev, psr-4, description, keywords, license, minimum-stability, name, prefer-stable (+5 more)
 
 ### Community 2 - "de"
 Cohesion: 0.33
@@ -271,9 +271,9 @@ Nodes (3): ce(), de, he()
 Cohesion: 0.06
 Nodes (31): alpinejs, autoprefixer, concurrently, echarts, @laravel/multiplex, laravel-vite-plugin, dependencies, echarts (+23 more)
 
-### Community 4 - "bootstrap/app.php"
-Cohesion: 0.40
-Nodes (3): Illuminate\Foundation\Application, Illuminate\Foundation\Configuration\Exceptions, Illuminate\Foundation\Configuration\Middleware
+### Community 4 - "X"
+Cohesion: 0.07
+Nodes (36): aw(), Bx(), Cf(), fk(), gE(), gh(), Gx(), Hx() (+28 more)
 
 ### Community 5 - "ListingIngestService"
 Cohesion: 0.06
@@ -301,7 +301,7 @@ Nodes (22): Commands, Database, Debugging, Deployment, Development Guidelines, E
 
 ### Community 12 - "echarts.min.js"
 Cohesion: 0.02
-Nodes (137): Ab(), aR(), at(), au(), Ax(), B(), bB(), be() (+129 more)
+Nodes (141): Ab(), aR(), at(), au(), Ax(), ay(), bB(), BD() (+133 more)
 
 ### Community 13 - "logging.php"
 Cohesion: 0.40
@@ -316,8 +316,8 @@ Cohesion: 0.10
 Nodes (3): PHPUnit\Framework\TestCase, ExampleTest, SseParserTest
 
 ### Community 18 - "Illuminate\Http\Request"
-Cohesion: 0.06
-Nodes (29): DashboardController, AuthenticatedSessionController, ConfirmablePasswordController, EmailVerificationNotificationController, EmailVerificationPromptController, NewPasswordController, PasswordController, PasswordResetLinkController (+21 more)
+Cohesion: 0.05
+Nodes (32): DashboardController, AuthenticatedSessionController, ConfirmablePasswordController, EmailVerificationNotificationController, EmailVerificationPromptController, NewPasswordController, PasswordController, PasswordResetLinkController (+24 more)
 
 ### Community 19 - "chart.umd.js"
 Cohesion: 0.03
@@ -332,16 +332,16 @@ Cohesion: 0.04
 Nodes (16): addBox(), configure(), d(), Di(), dt(), ke(), kn(), onClick() (+8 more)
 
 ### Community 28 - "index.global.min.js"
-Cohesion: 0.02
-Nodes (79): Mr(), ai(), Ao(), at(), batchRendering(), be(), bo, Br() (+71 more)
+Cohesion: 0.03
+Nodes (74): Mr(), ac(), ai(), at(), be(), Br(), Cn(), co (+66 more)
 
-### Community 29 - "a"
-Cohesion: 0.08
-Nodes (92): aA(), c(), p(), An(), ba(), r(), u(), bl() (+84 more)
+### Community 29 - "i"
+Cohesion: 0.09
+Nodes (88): aA(), ac(), c(), p(), An(), n(), B(), ba() (+80 more)
 
 ### Community 30 - "p"
 Cohesion: 0.05
-Nodes (52): b(), ci(), cl(), di(), E(), ec(), s(), es() (+44 more)
+Nodes (52): b(), Bn, ci(), cl(), componentWillUnmount(), di(), E(), s() (+44 more)
 
 ### Community 31 - "swiper-bundle.min.js"
 Cohesion: 0.09
@@ -352,28 +352,28 @@ Cohesion: 0.06
 Nodes (72): tn(), a(), Ae(), an(), at(), b(), be(), bt() (+64 more)
 
 ### Community 33 - "apexcharts.min.js"
-Cohesion: 0.03
-Nodes (52): _addRunner(), amove(), array(), attr(), ax(), ay(), bi, cancelImmediate() (+44 more)
+Cohesion: 0.04
+Nodes (41): _addRunner(), amove(), array(), attr(), ax(), ay(), cancelImmediate(), _clearTransformRunnersBefore() (+33 more)
 
 ### Community 34 - "ei"
-Cohesion: 0.06
-Nodes (9): cr(), ei, er, jt(), or(), parse(), Pn(), wr() (+1 more)
+Cohesion: 0.07
+Nodes (7): ei, er, ft(), gt(), hr(), parse(), ya()
 
 ### Community 35 - "c"
 Cohesion: 0.05
 Nodes (10): s(), t(), b(), c(), createTag(), substr(), s(), n() (+2 more)
 
 ### Community 36 - "Hn"
-Cohesion: 0.09
-Nodes (13): an(), bc(), da(), en, getMarkerDay(), getMarkerMonth(), getMarkerYear(), Hn (+5 more)
+Cohesion: 0.05
+Nodes (22): an(), bc(), bo, ct(), da(), ec(), en, getMarkerDay() (+14 more)
 
 ### Community 37 - "pi"
-Cohesion: 0.06
-Nodes (13): aa(), cc(), constructor(), ft(), hr(), ka(), ni(), oa (+5 more)
+Cohesion: 0.05
+Nodes (19): aa(), batchRendering(), constructor(), cs, dc(), events(), ia(), ka() (+11 more)
 
-### Community 38 - "U"
-Cohesion: 0.06
-Nodes (55): A(), Ad(), ay(), bk(), bv(), cv(), dv(), ed() (+47 more)
+### Community 38 - "Y"
+Cohesion: 0.07
+Nodes (40): Al(), bk(), bv(), Cr(), Cw(), di(), Dr(), Dw() (+32 more)
 
 ### Community 39 - "t"
 Cohesion: 0.08
@@ -385,19 +385,19 @@ Nodes (14): animate(), cancelFrame(), frame(), je, plot(), Qe, _queueNumberDelta
 
 ### Community 41 - ".constructor"
 Cohesion: 0.05
-Nodes (14): A(), ar(), Bi(), destroy(), ja, ji(), ns(), os (+6 more)
+Nodes (12): A(), Bi(), destroy(), ja, ji(), ns(), os, Qa (+4 more)
 
 ### Community 42 - "moment.js"
 Cohesion: 0.04
-Nodes (38): RFC-2822, add$1(), addSubtract$1(), addTimeToArrayFromToken(), extractFromRFC2822Strings(), get$1(), getParseRegexForToken(), hasOwnProp() (+30 more)
+Nodes (35): RFC-2822, add$1(), addParseToken(), addSubtract$1(), addWeekParseToken(), extractFromRFC2822Strings(), get$1(), isNumber() (+27 more)
 
 ### Community 43 - "q"
-Cohesion: 0.08
-Nodes (27): Am(), ao(), cb(), db(), eb(), ef(), ib(), g() (+19 more)
+Cohesion: 0.06
+Nodes (43): Ad(), Am(), ao(), bf(), Bs(), a(), cb(), db() (+35 more)
 
 ### Community 44 - "bt"
 Cohesion: 0.05
-Nodes (19): b(), bt, clipWith(), dmove(), J(), li, linker(), linkTo() (+11 more)
+Nodes (23): b(), bi, bt, clipWith(), componentTransfer(), fontface(), J(), linker() (+15 more)
 
 ### Community 45 - "a"
 Cohesion: 0.07
@@ -408,12 +408,12 @@ Cohesion: 0.09
 Nodes (50): be(), Ce(), D(), De(), _e(), ei(), Fe(), fi() (+42 more)
 
 ### Community 47 - "Sl"
-Cohesion: 0.09
-Nodes (6): is, mt(), pt(), rc, Sl, ss()
+Cohesion: 0.06
+Nodes (11): bt(), cc(), ic(), is, jl, mt(), nc, pt() (+3 more)
 
 ### Community 48 - "E"
-Cohesion: 0.05
-Nodes (69): aw(), az(), bf(), c(), Cm(), ct(), df(), Dk() (+61 more)
+Cohesion: 0.06
+Nodes (48): az(), Cl(), ct(), Dk(), Dl(), E(), el(), en() (+40 more)
 
 ### Community 49 - "a"
 Cohesion: 0.06
@@ -427,53 +427,49 @@ Nodes (50): a(), At(), b(), bt(), C(), Cn(), Ct(), dn() (+42 more)
 Cohesion: 0.04
 Nodes (15): active(), ai, ce, ci, clearTimeout(), fi, he, ke (+7 more)
 
-### Community 52 - "i"
-Cohesion: 0.06
-Nodes (47): bG(), br(), cc(), e(), ce(), Ci(), da(), dc() (+39 more)
+### Community 52 - "e"
+Cohesion: 0.09
+Nodes (25): A(), br(), e(), ce(), da(), dd(), er(), n() (+17 more)
 
 ### Community 53 - "User"
 Cohesion: 0.06
 Nodes (21): User, Carbon\Carbon, Illuminate\Auth\Events\Verified, Illuminate\Auth\Notifications\ResetPassword, Illuminate\Foundation\Auth\User, Illuminate\Foundation\Testing\RefreshDatabase, Illuminate\Foundation\Testing\TestCase, Illuminate\Support\Facades\Cache (+13 more)
 
 ### Community 54 - "vt"
-Cohesion: 0.08
-Nodes (3): ls, mt(), vt
+Cohesion: 0.07
+Nodes (4): ls, mt(), Ut, vt
 
 ### Community 55 - ".bbox"
 Cohesion: 0.06
-Nodes (18): center(), cy(), dx(), dy(), ee(), ge, hi, ie() (+10 more)
+Nodes (14): cy(), dx(), dy(), ee(), ge, hi, ie(), Ja (+6 more)
 
 ### Community 56 - ".init"
 Cohesion: 0.07
-Nodes (15): as(), createPointHandles(), createResizeHandles(), createRotationHandle(), draggable(), Fe, init(), is() (+7 more)
+Nodes (18): as(), center(), createPointHandles(), createResizeHandles(), createRotationHandle(), draggable(), Fe, init() (+10 more)
 
 ### Community 57 - "xt"
-Cohesion: 0.07
-Nodes (12): ft(), getEventHolder(), gt(), It(), ki, Pe(), Rt, Tt() (+4 more)
+Cohesion: 0.06
+Nodes (13): Dt, ft(), getEventHolder(), gt(), It(), ki, Pe(), Rt (+5 more)
 
-### Community 58 - ".add"
-Cohesion: 0.05
-Nodes (26): ac(), ea(), expand(), fr, ga(), ha, Ko(), lr() (+18 more)
+### Community 58 - "fr"
+Cohesion: 0.06
+Nodes (18): ea(), fr, ga(), ha, Ko(), lr(), ma(), mn() (+10 more)
 
 ### Community 59 - "E"
 Cohesion: 0.10
 Nodes (14): a(), b(), c(), E, g(), k(), l(), n() (+6 more)
 
-### Community 60 - "us"
-Cohesion: 0.08
-Nodes (4): getSelectorFromElement(), Rt, us, Y
-
 ### Community 61 - "t"
-Cohesion: 0.08
-Nodes (25): a(), At(), c(), constructor(), Ct, d(), _draw(), Dt (+17 more)
+Cohesion: 0.10
+Nodes (24): a(), At(), c(), constructor(), Ct, d(), _draw(), e() (+16 more)
 
 ### Community 62 - "shepherd.min.js"
 Cohesion: 0.08
-Nodes (36): Bb(), Bc(), Cb(), F(), fa(), fc(), gc(), H() (+28 more)
+Nodes (38): Bb(), Bc(), Cb(), g(), Da(), ec, F(), fa() (+30 more)
 
 ### Community 63 - "oi"
-Cohesion: 0.08
-Nodes (9): et(), fa(), Ke(), Me, oi(), R(), tt(), We() (+1 more)
+Cohesion: 0.07
+Nodes (10): et(), fa(), Ke(), Me, oi(), R(), tt(), ua (+2 more)
 
 ### Community 64 - "n"
 Cohesion: 0.06
@@ -483,25 +479,17 @@ Nodes (12): Be(), ei(), en, fn(), g(), gn(), n(), ne() (+4 more)
 Cohesion: 0.10
 Nodes (14): ao(), Bi(), Ci(), co(), cs, da(), Do(), Fi() (+6 more)
 
-### Community 66 - "ms"
-Cohesion: 0.15
-Nodes (5): gr(), ms(), sc, wl, z()
-
 ### Community 67 - "sweetalert2.min.js"
 Cohesion: 0.09
 Nodes (18): dt(), e(), emit(), En, Ft(), _getHandlersByEventName(), _main(), mt() (+10 more)
 
-### Community 68 - "qn"
+### Community 68 - "ro"
 Cohesion: 0.14
-Nodes (16): BD(), Fn(), Gd(), Hd(), Hn(), ii(), it(), jn() (+8 more)
+Nodes (3): Qs(), ro, ws
 
 ### Community 69 - "Sortable.min.js"
 Cohesion: 0.13
 Nodes (25): a(), b(), Bt(), D(), e(), f(), g(), h() (+17 more)
-
-### Community 70 - "pa"
-Cohesion: 0.08
-Nodes (11): Bn, cs, eo(), fe(), ia(), Oe(), pa(), Qr() (+3 more)
 
 ### Community 71 - "s"
 Cohesion: 0.05
@@ -511,9 +499,9 @@ Nodes (30): Bn(), bo, _calculateBarIndexPixels(), _calculateBarValuePixels(), de
 Cohesion: 0.08
 Nodes (13): beforeLayout(), buildLookupTable(), _generate(), getDecimalForValue(), _getTimestampsForTable(), getValueForPixel(), Go(), ho() (+5 more)
 
-### Community 73 - "z"
-Cohesion: 0.08
-Nodes (40): ac(), Cr(), D(), Dr(), ec(), eM(), ez(), Fm() (+32 more)
+### Community 73 - "Wt"
+Cohesion: 0.16
+Nodes (15): be(), bh(), bn(), Fh(), Ie(), Se(), Ss(), vi() (+7 more)
 
 ### Community 74 - "xt"
 Cohesion: 0.09
@@ -527,41 +515,41 @@ Nodes (14): Bt(), color(), Ft(), Gt(), It(), jt(), kt(), mt() (+6 more)
 Cohesion: 0.13
 Nodes (29): a(), c(), d(), e(), f(), h(), i(), n() (+21 more)
 
-### Community 77 - "El"
-Cohesion: 0.07
-Nodes (14): al, Cn(), co, componentDidUpdate(), dl, El, flushScrollReset(), fn() (+6 more)
+### Community 77 - "y"
+Cohesion: 0.05
+Nodes (17): dl, El, ii(), kl, ml(), ol(), oo(), pl() (+9 more)
 
 ### Community 78 - "leaflet.js"
 Cohesion: 0.07
 Nodes (7): a(), Ci(), ei(), ii(), l(), ri(), x()
 
-### Community 79 - "localeData"
-Cohesion: 0.09
-Nodes (30): addFormatToken(), addWeekYearFormatToken(), expandFormat(), replaceLongDateFormatTokens(), format(), formatMoment(), from(), fromNow() (+22 more)
+### Community 79 - "isValid"
+Cohesion: 0.10
+Nodes (33): addFormatToken(), addWeekYearFormatToken(), format(), formatMoment(), from(), fromNow(), getSetDayOfWeek(), getSetISODayOfWeek() (+25 more)
 
 ### Community 80 - "getParsingFlags"
-Cohesion: 0.11
-Nodes (30): calculateOffset(), checkOverflow(), checkWeekday(), configFromInput(), configFromISO(), configFromRFC2822(), configFromString(), configFromStringAndArray() (+22 more)
+Cohesion: 0.10
+Nodes (33): calculateOffset(), checkOverflow(), checkWeekday(), configFromInput(), configFromISO(), configFromRFC2822(), configFromString(), configFromStringAndArray() (+25 more)
 
 ### Community 81 - "remove"
-Cohesion: 0.08
-Nodes (6): fo, d(), kn, Q, remove(), Tn()
+Cohesion: 0.09
+Nodes (6): getSelectorFromElement(), d(), kn, remove(), Rt, Tn()
 
-### Community 82 - "isValid"
-Cohesion: 0.10
-Nodes (40): clone(), cloneWithOffset(), createLocal(), createUnix(), diff(), endOf(), get$2(), getCalendarFormat() (+32 more)
+### Community 82 - "createLocal"
+Cohesion: 0.13
+Nodes (31): clone(), cloneWithOffset(), createLocal(), createUnix(), diff(), endOf(), get$2(), getCalendarFormat() (+23 more)
 
 ### Community 83 - "c"
-Cohesion: 0.15
-Nodes (27): ac(), B(), Ca(), cc(), d(), e(), f(), g() (+19 more)
+Cohesion: 0.12
+Nodes (26): ac(), B(), Ca(), cc(), d(), e(), f(), h() (+18 more)
 
 ### Community 84 - "dragula.min.js"
 Cohesion: 0.21
 Nodes (27): a(), b(), c(), D(), E(), ee(), F(), n() (+19 more)
 
 ### Community 85 - "createDuration"
-Cohesion: 0.10
-Nodes (26): absRound(), addParseToken(), addSubtract(), addWeekParseToken(), clone$1(), createDuration(), createInvalid$1(), daysInMonth() (+18 more)
+Cohesion: 0.11
+Nodes (23): absRound(), addSubtract(), clone$1(), createDuration(), createInvalid$1(), daysInMonth(), get(), getDateOffset() (+15 more)
 
 ### Community 86 - "Ba"
 Cohesion: 0.12
@@ -576,16 +564,16 @@ Cohesion: 0.12
 Nodes (6): Ga(), sa(), ta(), Wa(), X(), Xa()
 
 ### Community 90 - "_l"
-Cohesion: 0.17
-Nodes (22): ap(), cp(), dp(), Dy(), ep(), fp(), hp(), I() (+14 more)
+Cohesion: 0.16
+Nodes (23): ap(), cp(), dp(), Dy(), ep(), fp(), hp(), I() (+15 more)
 
-### Community 91 - "ds"
-Cohesion: 0.11
-Nodes (8): bl, ds, fs(), gs(), kn(), ps(), us(), zl
+### Community 91 - "r"
+Cohesion: 0.10
+Nodes (15): ar(), bl, Bs(), ds, fs(), gl(), r(), gs() (+7 more)
 
-### Community 92 - "Iw"
-Cohesion: 0.19
-Nodes (15): bi(), Cw(), di(), Dw(), Ew(), fi(), hi(), hw() (+7 more)
+### Community 92 - "U"
+Cohesion: 0.08
+Nodes (59): bi(), bl(), cc(), Dm(), Ew(), ez(), fg(), g() (+51 more)
 
 ### Community 93 - "quill.min.js"
 Cohesion: 0.44
@@ -608,12 +596,12 @@ Cohesion: 0.13
 Nodes (4): addElements(), removeBox(), sn, stop()
 
 ### Community 100 - "ug"
-Cohesion: 0.21
-Nodes (14): ag(), cg(), dg(), eg(), hg(), lg(), mp(), i() (+6 more)
+Cohesion: 0.18
+Nodes (14): ag(), bp(), dg(), eg(), hg(), lg(), mp(), ng() (+6 more)
 
 ### Community 101 - "Qn"
-Cohesion: 0.05
-Nodes (13): ba(), componentDidMount(), fl, Ge(), Ie(), jn(), Qn(), ro (+5 more)
+Cohesion: 0.06
+Nodes (14): al, ba(), componentDidMount(), componentDidUpdate(), fl, flushScrollReset(), Ge(), Ie() (+6 more)
 
 ### Community 102 - "o"
 Cohesion: 0.09
@@ -630,6 +618,10 @@ Nodes (3): getElementFromSelector(), Gs, qs()
 ### Community 107 - "Item.php"
 Cohesion: 0.12
 Nodes (12): ItemFactory, ListingFactory, static, UserFactory, Illuminate\Database\Eloquent\Attributes\Fillable, Illuminate\Database\Eloquent\Attributes\Hidden, Illuminate\Database\Eloquent\Factories\Factory, Illuminate\Database\Eloquent\Factories\HasFactory (+4 more)
+
+### Community 108 - "hasOwnProp"
+Cohesion: 0.13
+Nodes (15): addTimeToArrayFromToken(), configFromObject(), Duration(), getParseRegexForToken(), getPrioritizedUnits(), hasOwnProp(), isDurationValid(), monthsRegex() (+7 more)
 
 ### Community 109 - "simplebar.min.js"
 Cohesion: 0.21
@@ -659,9 +651,9 @@ Nodes (12): checkBoxAll(), a(), emailDetailChange(), emailDetailShow(), favourit
 Cohesion: 0.25
 Nodes (14): checkTaskStatus(), drawList(), editTodoList(), fetchIdFromObj(), findNextId(), isPriority(), isStatus(), load() (+6 more)
 
-### Community 121 - "fn"
-Cohesion: 0.18
-Nodes (25): $a(), ab(), D(), db(), E(), Eb(), Fb(), fn() (+17 more)
+### Community 121 - "Z"
+Cohesion: 0.33
+Nodes (16): E(), Eb(), Fb(), G(), Hb(), ib(), J(), Ja() (+8 more)
 
 ### Community 122 - "LoginRequest"
 Cohesion: 0.12
@@ -680,16 +672,16 @@ Cohesion: 0.14
 Nodes (14): scripts, dev, post-autoload-dump, post-update-cmd, pre-package-uninstall, test, Composer\\Config::disableProcessTimeout, Illuminate\\Foundation\\ComposerScripts::postAutoloadDump (+6 more)
 
 ### Community 128 - "isFunction"
-Cohesion: 0.15
-Nodes (14): addRegexToken(), calendar(), calendar$1(), configFromObject(), getPrioritizedUnits(), isFunction(), makeFormatFunction(), normalizeObjectUnits() (+6 more)
+Cohesion: 0.22
+Nodes (10): addRegexToken(), calendar(), calendar$1(), isFunction(), makeFormatFunction(), relativeTime(), removeFormattingTokens(), set() (+2 more)
 
-### Community 129 - "yt"
-Cohesion: 0.18
-Nodes (4): jl, nc, xl, yt()
+### Community 129 - ".newLine"
+Cohesion: 0.22
+Nodes (3): dmove(), li, oi
 
-### Community 131 - "n"
-Cohesion: 0.09
-Nodes (28): Al(), n(), cA(), ea(), gp(), gw(), Hh(), o() (+20 more)
+### Community 131 - "A"
+Cohesion: 0.08
+Nodes (29): cA(), D(), dc(), eo(), Fm(), Hh(), o(), ic() (+21 more)
 
 ### Community 132 - "calendar.init.js"
 Cohesion: 0.20
@@ -712,8 +704,8 @@ Cohesion: 0.20
 Nodes (5): ae(), o(), r(), le(), ue()
 
 ### Community 140 - "getLocale"
-Cohesion: 0.17
-Nodes (16): chooseLocale(), compareArrays(), createAdder(), defineLocale(), deprecate(), deprecateSimple(), Duration(), getLocale() (+8 more)
+Cohesion: 0.21
+Nodes (14): chooseLocale(), compareArrays(), createAdder(), defineLocale(), deprecate(), deprecateSimple(), getLocale(), getSetGlobalLocale() (+6 more)
 
 ### Community 141 - "isotope.pkgd.min.js"
 Cohesion: 0.44
@@ -783,9 +775,9 @@ Nodes (3): on, rn(), sn
 Cohesion: 0.24
 Nodes (9): computeMonthsParse(), computeWeekdaysParse(), cmpLenRev(), createUTC(), handleStrictParse(), handleStrictParse$1(), localeMonthsParse(), localeWeekdaysParse() (+1 more)
 
-### Community 165 - "kc"
-Cohesion: 0.22
-Nodes (4): Da(), kc(), yb(), yc()
+### Community 165 - ".defs"
+Cohesion: 0.27
+Nodes (5): defs(), gradient(), marker(), pattern(), si
 
 ### Community 169 - "card.js"
 Cohesion: 0.31
@@ -851,6 +843,10 @@ Nodes (4): isStatus(), loadCandidateListData(), paginationEvents(), selectedPage
 Cohesion: 0.60
 Nodes (4): filterData(), loadJobListData(), paginationEvents(), selectedPage()
 
+### Community 193 - "fn"
+Cohesion: 0.33
+Nodes (9): $a(), ab(), D(), db(), fn(), ha(), ia(), Y() (+1 more)
+
 ### Community 195 - "master.blade.php"
 Cohesion: 0.40
 Nodes (4): apps.layouts.partials.breadcrumb, apps.layouts.partials.footer, apps.layouts.partials.header, apps.layouts.partials.sidebar
@@ -887,6 +883,10 @@ Nodes (3): a(), c(), d()
 Cohesion: 0.50
 Nodes (3): Learn More, Related Packages, Webfont - Material Design Icons
 
+### Community 211 - "S"
+Cohesion: 0.29
+Nodes (4): Na(), Oa(), S, V()
+
 ### Community 228 - "i"
 Cohesion: 1.00
 Nodes (3): i(), Mi(), zi()
@@ -895,14 +895,18 @@ Nodes (3): i(), Mi(), zi()
 Cohesion: 0.27
 Nodes (5): DatabaseSeeder, UsersTableSeeder, Illuminate\Database\Console\Seeds\WithoutModelEvents, Illuminate\Database\Seeder, Illuminate\Support\Facades\DB
 
-### Community 352 - "keywords"
+### Community 351 - "eo"
+Cohesion: 0.31
+Nodes (4): Ao(), Do(), eo(), Qe()
+
+### Community 352 - "extra"
 Cohesion: 0.67
-Nodes (3): keywords, framework, laravel
+Nodes (3): extra, laravel, dont-discover
 
 ## Knowledge Gaps
 - **152 isolated node(s):** `$schema`, `name`, `type`, `description`, `laravel` (+147 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **49 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **48 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
@@ -911,7 +915,7 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.078) - this node is a cross-community bridge._
 - **Why does `Bt()` connect `zt` to `Lt`, `chart.umd.js`?**
   _High betweenness centrality (0.054) - this node is a cross-community bridge._
-- **Why does `Oi()` connect `a` to `.constructor`, `Sl`, `chart.umd.js`, `Ki`, `.add`, `p`?**
+- **Why does `Oi()` connect `a` to `.constructor`, `Sl`, `remove`, `chart.umd.js`, `index.global.min.js`, `p`?**
   _High betweenness centrality (0.038) - this node is a cross-community bridge._
 - **Are the 10 inferred relationships involving `E()` (e.g. with `r()` and `p()`) actually correct?**
   _`E()` has 10 INFERRED edges - model-reasoned connections that need verification._

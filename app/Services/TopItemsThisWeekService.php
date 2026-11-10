@@ -47,6 +47,7 @@ class TopItemsThisWeekService
      * @return Collection<int, array{
      *     item_id: int,
      *     name: string,
+     *     slug: string|null,
      *     total: int,
      *     buy_count: int,
      *     sell_count: int
@@ -63,7 +64,7 @@ class TopItemsThisWeekService
                 ->join('items', 'items.id', '=', 'listings.item_id')
                 ->where('listings.posted_at', '>=', $period['start']->format('Y-m-d H:i:s.v'))
                 ->where('listings.posted_at', '<=', $period['end']->format('Y-m-d H:i:s.v'))
-                ->groupBy('listings.item_id', 'items.name')
+                ->groupBy('listings.item_id', 'items.name', 'items.slug')
                 ->selectRaw(
                     'listings.item_id as item_id, items.name as name, items.slug as slug, COUNT(*) as total, '.
                     'SUM(CASE WHEN listings.side = ? THEN 1 ELSE 0 END) as buy_count, '.
