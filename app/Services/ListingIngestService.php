@@ -153,10 +153,10 @@ class ListingIngestService
         }
 
         if ($errors !== []) {
-            Log::warning('Growlytics: malformed listing payload skipped.', [
-                'external_id' => is_scalar($data['id'] ?? null) ? (string) $data['id'] : null,
-                'errors' => $errors,
-            ]);
+            // Log::warning('Growlytics: malformed listing payload skipped.', [
+            //     'external_id' => is_scalar($data['id'] ?? null) ? (string) $data['id'] : null,
+            //     'errors' => $errors,
+            // ]);
 
             $this->notifyResult('rejected', ['errors' => $errors]);
 
