@@ -14,7 +14,7 @@ class ItemRecentWorldListingsService
         $page = max(1, $page);
         $key = 'item-recent-worlds:'.$item->id.':page:'.$page.':v1';
 
-        return Cache::remember($key, 60, function () use ($item, $page): array {
+        $cached = Cache::remember($key, 60, function () use ($item, $page): array {
             $end = Carbon::now('UTC');
             $start = $end->copy()->subDay();
 
@@ -53,6 +53,10 @@ class ItemRecentWorldListingsService
                 ],
             ];
         });
+
+        $cached['server_now'] = Carbon::now('UTC')->toIso8601String();
+
+        return $cached;
     }
 
     private function safeUrl(?string $url): ?string

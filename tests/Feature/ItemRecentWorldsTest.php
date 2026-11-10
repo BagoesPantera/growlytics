@@ -164,6 +164,54 @@ class ItemRecentWorldsTest extends TestCase
         $response->assertJsonPath('data.0.url', null);
     }
 
+    public function test_recent_worlds_serializes_posted_at_as_utc_iso8601(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-01-02 12:00:00', 'UTC'));
+
+        $item = Item::factory()->create();
+
+        Listing::factory()->create([
+            'item_id' => $item->id,
+            'side' => 'sell',
+            'world' => 'WORLD',
+            'price_wl' => 10,
+            'posted_at' => Carbon::parse('2026-01-02 10:30:00', 'UTC'),
+        ]);
+
+        $response = $this->getJson('/items/'.$item->id.'/recent-worlds');
+
+        $response->assertOk();
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00$/', $response->json('data.0.posted_at'));
+    }
+
+    public function test_server_now_is_fresh_even_on_cache_hit(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-01-02 12:00:00', 'UTC'));
+
+        Cache::flush();
+
+        $item = Item::factory()->create();
+
+        Listing::factory()->create([
+            'item_id' => $item->id,
+            'side' => 'sell',
+            'world' => 'WORLD',
+            'price_wl' => 10,
+            'posted_at' => Carbon::now('UTC')->subMinutes(10),
+        ]);
+
+        $first = $this->getJson('/items/'.$item->id.'/recent-worlds')->json();
+
+        Carbon::setTestNow(Carbon::parse('2026-01-02 12:00:10', 'UTC'));
+
+        $second = $this->getJson('/items/'.$item->id.'/recent-worlds')->json();
+
+        $this->assertSame($first['period']['end'], $second['period']['end']);
+        $this->assertNotSame($first['server_now'], $second['server_now']);
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00$/', $first['server_now']);
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00$/', $second['server_now']);
+    }
+
     public function test_recent_worlds_cache_hit_returns_identical_payload(): void
     {
         Carbon::setTestNow(Carbon::parse('2026-01-02 12:00:00', 'UTC'));

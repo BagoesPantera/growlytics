@@ -1,4 +1,5 @@
 import * as echarts from 'echarts';
+import { formatRelativeTime, updateRelativeTimeElements } from './relative-time.js';
 
 const chartEl = document.getElementById('item-price-chart');
 const rangeButtons = document.querySelectorAll('[data-range]');
@@ -10,6 +11,9 @@ let currentRange = '24H';
 let recentPage = 1;
 let recentHasMore = false;
 let loadingChart = false;
+let serverTimeOffset = 0;
+let serverTimeInitialized = false;
+let relativeTimeTimer = null;
 
 function formatNumber(value) {
     return new Intl.NumberFormat().format(value);
@@ -136,24 +140,30 @@ function renderChart(payload) {
             top: 0,
         },
         grid: [
-            { left: 50, right: 20, top: 40, height: '55%' },
-            { left: 50, right: 20, top: '72%', height: '18%' },
+            { left: 64, right: 24, top: 32, height: '56%' },
+            { left: 64, right: 24, top: '78%', height: '15%' },
         ],
         xAxis: [
             {
                 type: 'time',
                 gridIndex: 0,
-                axisLabel: { formatter: (value) => new Date(value).toLocaleString() },
+                min: times.length ? times[0].getTime() : undefined,
+                max: times.length ? times[times.length - 1].getTime() : undefined,
+                boundaryGap: false,
+                axisLabel: { show: false },
             },
             {
                 type: 'time',
                 gridIndex: 1,
-                axisLabel: { show: false },
+                min: times.length ? times[0].getTime() : undefined,
+                max: times.length ? times[times.length - 1].getTime() : undefined,
+                boundaryGap: false,
+                axisLabel: { hideOverlap: true, formatter: (value) => new Date(value).toLocaleString() },
             },
         ],
         yAxis: [
-            { type: 'value', name: 'WL', gridIndex: 0 },
-            { type: 'value', name: 'Count', gridIndex: 1 },
+            { type: 'value', name: 'WL', nameLocation: 'end', nameGap: 12, gridIndex: 0 },
+            { type: 'value', gridIndex: 1 },
         ],
         series: [
             {
@@ -283,30 +293,68 @@ async function loadRecentWorlds(page = 1, append = false) {
         recentContainer.innerHTML = '';
     }
 
+    const parsedServerTime = Date.parse(payload.server_now || payload.period?.end);
+
+    if (!serverTimeInitialized && Number.isFinite(parsedServerTime)) {
+        serverTimeOffset = parsedServerTime - Date.now();
+        serverTimeInitialized = true;
+    }
+
     rows.forEach((row) => {
-        const item = document.createElement('div');
-        item.className = 'rounded-2xl border border-[#E4EAF0] bg-white p-4 shadow-sm';
+        const card = document.createElement('div');
+        card.className = 'rounded-2xl border border-[#E4EAF0] bg-white p-4 shadow-sm';
 
-        const url = row.url
-            ? `<a href="${row.url}" target="_blank" rel="noopener noreferrer" class="text-xs text-[#2f7a27] underline">Source</a>`
-            : '';
+        const layout = document.createElement('div');
+        layout.className = 'flex items-center justify-between gap-3';
 
-        item.innerHTML = `
-            <div class="flex items-center justify-between gap-3">
-                <div>
-                    <p class="text-sm font-bold text-[#172B44]">${row.world}</p>
-                    <p class="text-xs text-gray-500">${new Date(row.posted_at).toLocaleString()}</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-sm font-black text-[#172B44]">${formatNumber(row.price_wl)} WL</p>
-                    ${row.world_verified ? '<p class="text-xs text-[#2f7a27]">Verified</p>' : ''}
-                    ${url}
-                </div>
-            </div>
-        `;
+        const left = document.createElement('div');
 
-        recentContainer.appendChild(item);
+        const world = document.createElement('p');
+        world.className = 'text-sm font-bold text-[#172B44]';
+        world.textContent = row.world;
+
+        const time = document.createElement('time');
+        time.className = 'text-xs text-gray-500';
+        time.dateTime = row.posted_at;
+        time.dataset.relativeTime = 'true';
+        time.title = formatAbsoluteTime(row.posted_at);
+        time.textContent = formatRelativeTime(row.posted_at, currentServerNow());
+
+        left.append(world, time);
+
+        const right = document.createElement('div');
+        right.className = 'text-right';
+
+        const price = document.createElement('p');
+        price.className = 'text-sm font-black text-[#172B44]';
+        price.textContent = `${formatNumber(row.price_wl)} WL`;
+
+        right.append(price);
+
+        if (row.world_verified) {
+            const verified = document.createElement('p');
+            verified.className = 'text-xs text-[#2f7a27]';
+            verified.textContent = 'Verified';
+            right.append(verified);
+        }
+
+        if (row.url) {
+            const source = document.createElement('a');
+            source.href = row.url;
+            source.target = '_blank';
+            source.rel = 'noopener noreferrer';
+            source.className = 'text-xs text-[#2f7a27] underline';
+            source.textContent = 'Source';
+            right.append(source);
+        }
+
+        layout.append(left, right);
+        card.append(layout);
+        recentContainer.appendChild(card);
     });
+
+    updateRelativeTimes();
+    ensureRelativeTimeUpdates();
 
     recentHasMore = payload.has_more;
     recentPage = payload.current_page;
@@ -314,6 +362,49 @@ async function loadRecentWorlds(page = 1, append = false) {
     if (loadMoreButton) {
         loadMoreButton.classList.toggle('hidden', !recentHasMore);
     }
+}
+
+function currentServerNow() {
+    return new Date(Date.now() + (Number.isFinite(serverTimeOffset) ? serverTimeOffset : 0));
+}
+
+function formatAbsoluteTime(value) {
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return 'Unknown time';
+    }
+
+    return date.toLocaleString();
+}
+
+function updateRelativeTimes() {
+    updateRelativeTimeElements(recentContainer, currentServerNow());
+}
+
+function hasRelativeTimeElements() {
+    return Boolean(recentContainer?.querySelector('[data-relative-time]'));
+}
+
+function startRelativeTimeUpdates() {
+    if (!hasRelativeTimeElements()) {
+        return;
+    }
+
+    if (relativeTimeTimer) {
+        clearInterval(relativeTimeTimer);
+    }
+
+    relativeTimeTimer = setInterval(updateRelativeTimes, 30000);
+}
+
+function ensureRelativeTimeUpdates() {
+    if (!hasRelativeTimeElements()) {
+        return;
+    }
+
+    updateRelativeTimes();
+    startRelativeTimeUpdates();
 }
 
 function bootstrapItemDetail() {
@@ -337,7 +428,28 @@ function bootstrapItemDetail() {
     }
 
     loadPriceHistory('24H');
-    loadRecentWorlds(1);
+    loadRecentWorlds(1).catch(() => {});
+
+    window.addEventListener('pagehide', () => {
+        if (relativeTimeTimer) {
+            clearInterval(relativeTimeTimer);
+            relativeTimeTimer = null;
+        }
+    }, { once: true });
+
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted) {
+            updateRelativeTimes();
+            ensureRelativeTimeUpdates();
+        }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            updateRelativeTimes();
+            ensureRelativeTimeUpdates();
+        }
+    });
 
     if (loadMoreButton) {
         loadMoreButton.addEventListener('click', () => {
