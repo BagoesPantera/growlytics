@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'normalized_name'])]
+#[Fillable(['name', 'normalized_name', 'slug'])]
 class Item extends Model
 {
     /** @use HasFactory<ItemFactory> */
@@ -22,5 +22,29 @@ class Item extends Model
     public function listings(): HasMany
     {
         return $this->hasMany(Listing::class);
+    }
+
+    /**
+     * Use the permanent slug for URLs when it exists, while retaining
+     * numeric IDs for legacy URLs and internal relations.
+     */
+    public function getRouteKey(): mixed
+    {
+        return $this->slug ?: (string) $this->getKey();
+    }
+
+    public function resolveRouteBinding($value, $field = null): ?static
+    {
+        if ($field !== null) {
+            return parent::resolveRouteBinding($value, $field);
+        }
+
+        $item = $this->where('slug', (string) $value)->first();
+
+        if ($item === null && ctype_digit((string) $value)) {
+            $item = $this->find((int) $value);
+        }
+
+        return $item;
     }
 }

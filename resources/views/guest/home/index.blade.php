@@ -113,7 +113,11 @@
                                 {{ $index + 1 }}
                             </span>
                             <div>
-                                <h3 class="text-sm font-bold text-[#172B44] sm:text-base">{{ $item['name'] }}</h3>
+                                <h3 class="text-sm font-bold text-[#172B44] sm:text-base">
+                                    <a href="{{ route('items.show', $item['slug'] ?? $item['item_id']) }}" class="hover:text-[#58CC45]">
+                                        {{ $item['name'] }}
+                                    </a>
+                                </h3>
                                 <p class="text-xs text-gray-500">Item #{{ $item['item_id'] }}</p>
                             </div>
                         </div>

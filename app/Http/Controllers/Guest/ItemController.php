@@ -18,10 +18,18 @@ class ItemController extends Controller
         private ItemRecentWorldListingsService $recentWorlds,
     ) {}
 
-    public function show(Item $item)
+    public function show(string $item)
     {
+        $resolved = $this->resolveItem($item);
+
+        abort_if($resolved === null, 404);
+
+        if ($resolved->slug !== null && ctype_digit($item) && $resolved->slug !== $item) {
+            return redirect()->route('items.show', $resolved, 301);
+        }
+
         return view('guest.items.show', [
-            'item' => $item,
+            'item' => $resolved,
         ]);
     }
 
@@ -40,25 +48,44 @@ class ItemController extends Controller
         ]);
     }
 
-    public function priceHistory(Item $item, Request $request): JsonResponse
+    public function priceHistory(string $item, Request $request): JsonResponse
     {
+        $resolved = $this->resolveItem($item);
+
+        abort_if($resolved === null, 404);
+
         $validated = $request->validate([
             'range' => ['nullable', 'string', 'in:24H,7D,30D,90D,1Y'],
         ]);
 
         $range = $validated['range'] ?? '24H';
 
-        return response()->json($this->priceHistory->history($item, $range));
+        return response()->json($this->priceHistory->history($resolved, $range));
     }
 
-    public function recentWorlds(Item $item, Request $request): JsonResponse
+    public function recentWorlds(string $item, Request $request): JsonResponse
     {
+        $resolved = $this->resolveItem($item);
+
+        abort_if($resolved === null, 404);
+
         $validated = $request->validate([
             'page' => ['nullable', 'integer', 'min:1'],
         ]);
 
         $page = (int) ($validated['page'] ?? 1);
 
-        return response()->json($this->recentWorlds->recent($item, $page));
+        return response()->json($this->recentWorlds->recent($resolved, $page));
+    }
+
+    private function resolveItem(string $value): ?Item
+    {
+        $item = Item::query()->where('slug', $value)->first();
+
+        if ($item === null && ctype_digit($value)) {
+            $item = Item::query()->find((int) $value);
+        }
+
+        return $item;
     }
 }

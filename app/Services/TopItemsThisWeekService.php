@@ -65,7 +65,7 @@ class TopItemsThisWeekService
                 ->where('listings.posted_at', '<=', $period['end']->format('Y-m-d H:i:s.v'))
                 ->groupBy('listings.item_id', 'items.name')
                 ->selectRaw(
-                    'listings.item_id as item_id, items.name as name, COUNT(*) as total, '.
+                    'listings.item_id as item_id, items.name as name, items.slug as slug, COUNT(*) as total, '.
                     'SUM(CASE WHEN listings.side = ? THEN 1 ELSE 0 END) as buy_count, '.
                     'SUM(CASE WHEN listings.side = ? THEN 1 ELSE 0 END) as sell_count',
                     ['buy', 'sell']
@@ -77,6 +77,7 @@ class TopItemsThisWeekService
                 ->map(fn (object $row): array => [
                     'item_id' => (int) $row->item_id,
                     'name' => (string) $row->name,
+                    'slug' => $row->slug !== null ? (string) $row->slug : null,
                     'total' => (int) $row->total,
                     'buy_count' => (int) $row->buy_count,
                     'sell_count' => (int) $row->sell_count,

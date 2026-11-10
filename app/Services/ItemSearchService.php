@@ -26,12 +26,12 @@ class ItemSearchService
                 ->orderByRaw('case when normalized_name like ? then 0 else 1 end', [$term.'%'])
                 ->orderBy('normalized_name')
                 ->limit($limit)
-                ->get(['id', 'name']);
+                ->get(['id', 'name', 'slug']);
 
             return $items->map(fn (Item $item): array => [
                 'id' => $item->id,
                 'name' => $item->name,
-                'url' => route('items.show', $item),
+                'url' => route('items.show', $item->slug ?: $item->id),
             ])->all();
         });
 

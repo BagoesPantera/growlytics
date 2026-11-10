@@ -309,10 +309,29 @@ class ListingIngestService
             return $item;
         }
 
-        try {
-            return Item::create(['name' => $name, 'normalized_name' => $normalizedName]);
-        } catch (UniqueConstraintViolationException) {
-            return Item::where('normalized_name', $normalizedName)->firstOrFail();
+        $maxAttempts = ItemSlugGenerator::DEFAULT_MAX_ATTEMPTS;
+
+        for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
+            $item = Item::where('normalized_name', $normalizedName)->first();
+
+            if ($item !== null) {
+                return $item;
+            }
+
+            try {
+                $slug = ItemSlugGenerator::generateUniqueSlug($name, 1);
+
+                return Item::create([
+                    'name' => $name,
+                    'normalized_name' => $normalizedName,
+                    'slug' => $slug,
+                ]);
+            } catch (UniqueConstraintViolationException|\RuntimeException) {
+                // Either normalized_name or slug collided; loop and re-check.
+                continue;
+            }
         }
+
+        throw new \RuntimeException('Unable to create item with a unique slug.');
     }
 }
