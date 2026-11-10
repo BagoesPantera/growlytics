@@ -7,6 +7,7 @@ use App\Models\Listing;
 use App\Services\ListingIngestService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -221,6 +222,20 @@ class ListingIngestServiceTest extends TestCase
         $this->assertFalse($listing->world_verified);
     }
 
+    public function test_does_not_log_successful_or_duplicate_listings(): void
+    {
+        Log::spy();
+
+        $service = app(ListingIngestService::class);
+
+        $service->ingest($this->validPayload());
+        $service->ingest($this->validPayload(['id' => '8398864']));
+        $service->ingest($this->validPayload()); // duplicate external id
+
+        Log::shouldNotHaveReceived('info');
+        Log::shouldNotHaveReceived('debug');
+    }
+
     public function test_rejecting_a_payload_does_not_affect_the_next_valid_one(): void
     {
         $service = app(ListingIngestService::class);
@@ -229,5 +244,16 @@ class ListingIngestServiceTest extends TestCase
         $service->ingest($this->validPayload());
 
         $this->assertSame(1, Listing::query()->count());
+    }
+
+    public function test_still_logs_malformed_payload_warnings(): void
+    {
+        Log::spy();
+
+        app(ListingIngestService::class)->ingest($this->validPayload(['side' => 'invalid']));
+
+        Log::shouldHaveReceived('warning')->once();
+        Log::shouldNotHaveReceived('info');
+        Log::shouldNotHaveReceived('debug');
     }
 }

@@ -70,21 +70,12 @@ class ListingIngestService
                 } catch (UniqueConstraintViolationException) {
                     // A concurrent process stored this event first; keep the
                     // original record untouched.
-                    Log::info('Growlytics: duplicate listing skipped.', [
-                        'external_id' => $validated['external_id'],
-                    ]);
-
                     $this->notifyResult('duplicate', [
                         'external_id' => $validated['external_id'],
                     ]);
 
                     return;
                 }
-
-                Log::debug('Growlytics: listing saved.', [
-                    'external_id' => $listing->external_id,
-                    'item_id' => $listing->item_id,
-                ]);
 
                 $this->notifyResult('saved', [
                     'external_id' => $listing->external_id,

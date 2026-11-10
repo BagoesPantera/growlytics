@@ -209,11 +209,6 @@ class StreamGrowtopiaListings extends Command
 
         if (! is_array($payload)) {
             // Not every SSE event carries a listing (keepalives, etc.).
-            Log::debug('Growlytics: ignoring non-JSON SSE event.', [
-                'event' => $event->event,
-                'preview' => Str::limit($event->data, 200),
-            ]);
-
             return;
         }
 

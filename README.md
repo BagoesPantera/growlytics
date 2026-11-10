@@ -179,7 +179,7 @@ php artisan growlytics:stream --once
 ### Debugging
 
 - Use `--once` to test one connection cycle.
-- Check Laravel logs for connection failures, malformed payloads, duplicates, and database errors.
+- Check Laravel logs for connection failures, malformed payloads, and database errors.
 - Inspect the HTTP status and content type warnings for endpoint issues.
 
 ### Known limitations
