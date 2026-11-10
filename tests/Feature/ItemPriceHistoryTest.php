@@ -251,4 +251,87 @@ class ItemPriceHistoryTest extends TestCase
         $this->assertSame($first['generated_at'], $second['generated_at']);
         $this->assertTrue(Cache::has('item-price-history:'.$item->id.':24H:v1'));
     }
+
+    public function test_fractional_prices_appear_in_analytics(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-01-02 12:00:00', 'UTC'));
+
+        $item = Item::factory()->create();
+
+        Listing::factory()->create([
+            'item_id' => $item->id,
+            'side' => 'sell',
+            'price_wl' => '0.10000000',
+            'posted_at' => Carbon::now('UTC')->subMinutes(10),
+        ]);
+
+        Listing::factory()->create([
+            'item_id' => $item->id,
+            'side' => 'sell',
+            'price_wl' => '0.20000000',
+            'posted_at' => Carbon::now('UTC')->subMinutes(20),
+        ]);
+
+        $response = $this->getJson('/items/'.$item->id.'/price-history?range=24H');
+
+        $response->assertOk();
+        $response->assertJsonPath('summary.sell.count', 2);
+        $response->assertJsonPath('summary.sell.min', 0.1);
+        $response->assertJsonPath('summary.sell.max', 0.2);
+    }
+
+    public function test_large_decimal_prices_do_not_crash_analytics(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-01-02 12:00:00', 'UTC'));
+
+        $item = Item::factory()->create();
+
+        Listing::factory()->create([
+            'item_id' => $item->id,
+            'side' => 'buy',
+            'price_wl' => '880251434380165100.00000000',
+            'posted_at' => Carbon::now('UTC')->subMinutes(10),
+        ]);
+
+        $response = $this->getJson('/items/'.$item->id.'/price-history?range=24H');
+
+        $response->assertOk();
+        $response->assertJsonPath('summary.buy.count', 1);
+        $this->assertNotNull($response->json('summary.buy.min'));
+        $this->assertNotNull($response->json('summary.buy.max'));
+    }
+
+    public function test_utc_boundary_includes_listing_at_exact_window_start(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-01-02 12:00:00', 'UTC'));
+
+        $item = Item::factory()->create();
+
+        Listing::factory()->create([
+            'item_id' => $item->id,
+            'side' => 'sell',
+            'price_wl' => 50,
+            'posted_at' => Carbon::now('UTC')->subDay(),
+        ]);
+
+        $response = $this->getJson('/items/'.$item->id.'/price-history?range=24H');
+
+        $response->assertOk();
+        $response->assertJsonPath('summary.sell.count', 1);
+    }
+
+    public function test_empty_state_payload_only_has_zero_counts_when_no_listings(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-01-02 12:00:00', 'UTC'));
+
+        $item = Item::factory()->create();
+
+        $response = $this->getJson('/items/'.$item->id.'/price-history?range=24H');
+
+        $response->assertOk();
+        $response->assertJsonPath('summary.buy.count', 0);
+        $response->assertJsonPath('summary.sell.count', 0);
+        $response->assertJsonPath('summary.buy.min', null);
+        $response->assertJsonPath('summary.sell.max', null);
+    }
 }

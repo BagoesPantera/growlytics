@@ -133,7 +133,8 @@ Do not commit real `.env` values or credentials.
 - `external_id` (unique, max 64 chars)
 - `item_id` (foreign key, `restrictOnDelete`)
 - `side` (`buy` or `sell`)
-- `price_wl` (unsigned integer)
+- `price_wl` (non-negative DECIMAL(28,8))
+- `price_wl_raw` (nullable string, original incoming price representation)
 - `server`, `channel` (nullable)
 - `world` (nullable, max 100)
 - `world_verified` (boolean, default false)
@@ -186,7 +187,7 @@ php artisan growlytics:stream --once
 
 - The source may ignore `Last-Event-ID`; events posted during downtime can be lost.
 - Graceful SIGTERM/SIGINT shutdown requires PCNTL and is unavailable on Windows.
-- `price_wl` is an integer; fractional or negative prices are rejected, not rounded.
+- `price_wl` is stored as DECIMAL(20,8) and Eloquent casts it with `decimal:8` (HalfUp rounding to 8 decimals). Fractional prices are accepted; the original incoming representation is preserved in `price_wl_raw`.
 - UTC storage assumes `APP_TIMEZONE` is UTC. The current config sets `Asia/Makassar`, which breaks `posted_at` round-tripping; this is a known issue and should be corrected before production use.
 
 ## Deployment

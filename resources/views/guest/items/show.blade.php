@@ -61,7 +61,7 @@
                     Loading price history...
                 </div>
                 <div id="chart-empty" class="hidden absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/80 text-sm text-gray-500">
-                    No listings in this range.
+                    No listings in the selected time range.
                 </div>
                 <div id="chart-error" class="hidden absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/80 text-sm text-red-500">
                     Failed to load price history.
@@ -76,8 +76,9 @@
                 ></div>
             </div>
             <p class="mt-2 text-xs text-gray-500">
-                Scatter points are sampled for display only; median and percentiles use all valid listings.
-            </p>
+    Scatter points are sampled for display only; median and percentiles use all valid listings.
+    Top Items This Week uses the current UTC week, while this chart uses the selected rolling range.
+</p>
         </div>
     </section>
 

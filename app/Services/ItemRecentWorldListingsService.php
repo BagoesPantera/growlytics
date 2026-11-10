@@ -33,7 +33,7 @@ class ItemRecentWorldListingsService
                 return [
                     'id' => $listing->id,
                     'world' => $listing->world,
-                    'price_wl' => (int) $listing->price_wl,
+                    'price_wl' => (float) $listing->price_wl,
                     'posted_at' => Carbon::parse($listing->posted_at, 'UTC')->toIso8601String(),
                     'world_verified' => (bool) $listing->world_verified,
                     'url' => $this->safeUrl($listing->url),

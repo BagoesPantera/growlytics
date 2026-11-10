@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'item_id',
     'side',
     'price_wl',
+    'price_wl_raw',
     'server',
     'channel',
     'world',
@@ -38,6 +39,7 @@ class Listing extends Model
     protected function casts(): array
     {
         return [
+            'price_wl' => 'decimal:8',
             'world_verified' => 'boolean',
             'posted_at' => 'datetime',
         ];

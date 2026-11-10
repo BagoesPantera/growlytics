@@ -22,6 +22,8 @@ use Throwable;
  */
 class ListingIngestService
 {
+    private const PRICE_WL_MAX = '99999999999999999999.99999999';
+
     /**
      * Create a new ingestion service.
      *
@@ -57,6 +59,7 @@ class ListingIngestService
                     'item_id' => $item->getKey(),
                     'side' => $validated['side'],
                     'price_wl' => $validated['price_wl'],
+                    'price_wl_raw' => $validated['price_wl_raw'],
                     'server' => $validated['server'],
                     'channel' => $validated['channel'],
                     'world' => $validated['world'],
@@ -134,7 +137,7 @@ class ListingIngestService
 
         $priceWl = $this->validatedPriceWl(Arr::get($data, 'priceWl'));
         if ($priceWl === null) {
-            $errors[] = 'priceWl must be a non-negative integer (fractional prices are rejected)';
+            $errors[] = 'priceWl must be a non-negative integer or decimal';
         }
 
         $postedAt = $this->validatedPostedAt(Arr::get($data, 'postedAt'));
@@ -153,10 +156,10 @@ class ListingIngestService
         }
 
         if ($errors !== []) {
-            // Log::warning('Growlytics: malformed listing payload skipped.', [
-            //     'external_id' => is_scalar($data['id'] ?? null) ? (string) $data['id'] : null,
-            //     'errors' => $errors,
-            // ]);
+            Log::warning('Growlytics: malformed listing payload skipped.', [
+                'external_id' => is_scalar($data['id'] ?? null) ? (string) $data['id'] : null,
+                'errors' => $errors,
+            ]);
 
             $this->notifyResult('rejected', ['errors' => $errors]);
 
@@ -169,6 +172,7 @@ class ListingIngestService
             'item_name' => $itemName,
             'normalized_name' => static::normalizeItemName($itemName),
             'price_wl' => $priceWl,
+            'price_wl_raw' => $this->priceWlRawRepresentation(Arr::get($data, 'priceWl')),
             'server' => $server,
             'channel' => $channel,
             'world' => $world,
@@ -206,18 +210,46 @@ class ListingIngestService
         return $trimmed;
     }
 
-    protected function validatedPriceWl(mixed $value): ?int
+    protected function validatedPriceWl(mixed $value): ?string
     {
-        // Integer World Locks only: fractional prices are rejected, never rounded.
-        if (is_string($value) && preg_match('/^-?\d+$/', $value) === 1) {
-            $value = (int) $value;
+        if (is_bool($value)) {
+            return null;
         }
 
-        if (! is_int($value) || $value < 0) {
+        if (is_int($value)) {
+            if ($value < 0) {
+                return null;
+            }
+
+            $value = (string) $value;
+        } elseif (is_float($value)) {
+            if (! is_finite($value) || $value < 0) {
+                return null;
+            }
+
+            $value = (string) $value;
+        } elseif (is_string($value)) {
+            if (preg_match('/^\d+(\.\d+)?$/', $value) !== 1) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+
+        if (preg_match('/^\d+(\.\d+)?$/', $value) !== 1) {
+            return null;
+        }
+
+        if (bccomp($value, self::PRICE_WL_MAX, 8) > 0) {
             return null;
         }
 
         return $value;
+    }
+
+    protected function priceWlRawRepresentation(mixed $value): string
+    {
+        return is_string($value) ? $value : (string) $value;
     }
 
     protected function validatedPostedAt(mixed $value): ?Carbon

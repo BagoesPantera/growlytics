@@ -345,4 +345,20 @@ class TopItemsThisWeekTest extends TestCase
         $this->assertSame(1, $items->first()['buy_count']);
         $this->assertSame(0, $items->first()['sell_count']);
     }
+
+    public function test_ranked_item_detail_contains_matching_counts_for_same_period(): void
+    {
+        $now = $this->freezeNow('2026-11-11 12:00:00');
+        $postedAt = $now->copy()->subHour();
+
+        $item = $this->itemWithListings('Consistency Item', 2, 3, $postedAt, 1);
+
+        $this->get(route('home.index'))->assertOk()->assertSee('Consistency Item');
+
+        $response = $this->getJson('/items/'.$item->id.'/price-history?range=24H');
+
+        $response->assertOk();
+        $response->assertJsonPath('summary.buy.count', 2);
+        $response->assertJsonPath('summary.sell.count', 3);
+    }
 }

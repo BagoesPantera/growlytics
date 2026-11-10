@@ -27,4 +27,31 @@ class ItemDetailTest extends TestCase
 
         $response->assertNotFound();
     }
+
+    public function test_detail_resolves_item_by_slug(): void
+    {
+        $item = Item::factory()->create([
+            'name' => 'Crystal Pack',
+            'normalized_name' => 'crystal pack',
+            'slug' => 'crystal-pack-abc123',
+        ]);
+
+        $response = $this->get('/items/crystal-pack-abc123');
+
+        $response->assertOk();
+        $response->assertSee('Crystal Pack');
+    }
+
+    public function test_detail_redirects_numeric_id_to_slug(): void
+    {
+        $item = Item::factory()->create([
+            'name' => 'Crystal Pack',
+            'normalized_name' => 'crystal pack',
+            'slug' => 'crystal-pack-abc123',
+        ]);
+
+        $response = $this->get('/items/'.$item->id);
+
+        $response->assertRedirect(route('items.show', $item));
+    }
 }

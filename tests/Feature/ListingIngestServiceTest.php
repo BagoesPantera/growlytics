@@ -47,7 +47,7 @@ class ListingIngestServiceTest extends TestCase
         $this->assertSame('8398863', $listing->external_id);
         $this->assertSame($item->id, $listing->item_id);
         $this->assertSame('sell', $listing->side);
-        $this->assertSame(10, $listing->price_wl);
+        $this->assertSame('10.00000000', $listing->price_wl);
         $this->assertSame('The Lost Nemo!', $listing->server);
         $this->assertSame('🔮・buy-sell-crystals', $listing->channel);
         $this->assertSame('MICAX', $listing->world);
@@ -105,7 +105,58 @@ class ListingIngestServiceTest extends TestCase
 
         $listing = Listing::query()->sole();
         $this->assertSame('sell', $listing->side);
-        $this->assertSame(10, $listing->price_wl);
+        $this->assertSame('10.00000000', $listing->price_wl);
+    }
+
+    public function test_accepts_fractional_and_decimal_prices(): void
+    {
+        foreach ([10, 1.5, 0.16666666666666666, 0] as $price) {
+            app(ListingIngestService::class)->ingest($this->validPayload([
+                'id' => 'price-'.str_replace('.', '_', (string) $price),
+                'priceWl' => $price,
+            ]));
+        }
+
+        $prices = Listing::query()->orderBy('id')->pluck('price_wl')->all();
+        $raws = Listing::query()->orderBy('id')->pluck('price_wl_raw')->all();
+
+        $this->assertSame(['10.00000000', '1.50000000', '0.16666667', '0.00000000'], $prices);
+        $this->assertSame(['10', '1.5', '0.16666666666667', '0'], $raws);
+    }
+
+    public function test_accepts_decimal_string_prices(): void
+    {
+        app(ListingIngestService::class)->ingest($this->validPayload([
+            'priceWl' => '1.5',
+        ]));
+
+        $listing = Listing::query()->sole();
+
+        $this->assertSame('1.50000000', $listing->price_wl);
+        $this->assertSame('1.5', $listing->price_wl_raw);
+    }
+
+    public function test_accepts_large_integer_prices(): void
+    {
+        app(ListingIngestService::class)->ingest($this->validPayload([
+            'id' => 'large-price',
+            'priceWl' => '880251434380165100',
+        ]));
+
+        $listing = Listing::query()->sole();
+
+        $this->assertSame('880251434380165100.00000000', $listing->price_wl);
+        $this->assertSame('880251434380165100', $listing->price_wl_raw);
+    }
+
+    public function test_rejects_out_of_range_prices(): void
+    {
+        app(ListingIngestService::class)->ingest($this->validPayload([
+            'id' => 'too-large',
+            'priceWl' => '100000000000000000000',
+        ]));
+
+        $this->assertDatabaseCount('listings', 0);
     }
 
     public function test_accepts_integer_ids_and_digit_string_prices(): void
@@ -116,8 +167,9 @@ class ListingIngestServiceTest extends TestCase
         ]));
 
         $listing = Listing::query()->sole();
+
         $this->assertSame('8398863', $listing->external_id);
-        $this->assertSame(10, $listing->price_wl);
+        $this->assertSame('10.00000000', $listing->price_wl);
     }
 
     public function test_preserves_buy_and_sell_sides(): void
@@ -180,8 +232,14 @@ class ListingIngestServiceTest extends TestCase
             'empty item' => [['item' => '   '] + $base],
             'item too long' => [['item' => str_repeat('x', 256)] + $base],
             'negative price' => [['priceWl' => -1] + $base],
-            'fractional price float' => [['priceWl' => 10.5] + $base],
-            'fractional price string' => [['priceWl' => '10.5'] + $base],
+            'negative price float' => [['priceWl' => -1.5] + $base],
+            'negative price string' => [['priceWl' => '-1'] + $base],
+            'nan price' => [['priceWl' => NAN] + $base],
+            'inf price' => [['priceWl' => INF] + $base],
+            'price string nan' => [['priceWl' => 'NaN'] + $base],
+            'price string inf' => [['priceWl' => 'INF'] + $base],
+            'price boolean' => [['priceWl' => true] + $base],
+            'price null' => [['priceWl' => null] + $base],
             'price with whitespace' => [['priceWl' => '10 '] + $base],
             'missing postedAt' => [['postedAt' => null] + $base],
             'invalid postedAt' => [['postedAt' => 'not-a-date'] + $base],

@@ -60,7 +60,7 @@ Growlytics uses Bootstrap for the admin dashboard, NOT Tailwind CSS.
 - Keep buy and sell data distinguishable via the `side` enum.
 - Preserve original event timestamps; parse them as UTC.
 - Store timestamps consistently in UTC.
-- Do not silently round or alter `price_wl`; reject fractional or negative values.
+- `price_wl` is stored as DECIMAL(28,8) (non-negative). Values are validated as non-negative decimals and stored as decimal strings; Eloquent casts `price_wl` with `decimal:8` (Brick\Math BigDecimal, HalfUp rounding to 8 decimals). Fractional inputs are accepted, never silently rounded on ingestion beyond the 8-decimal column precision. The original incoming representation is preserved in the nullable `price_wl_raw` column. Validated range is 0 through 99999999999999999999.99999999.
 - Avoid destructive migrations without explicit approval.
 - Tests use SQLite in-memory; do not run destructive commands against the development database.
 
@@ -84,6 +84,7 @@ Future analytics should:
 - Distinguish advertised prices from confirmed transaction prices.
 - Avoid misleading statistics from very small sample sizes.
 - Prefer efficient SQL aggregation using existing indexes.
+- Analytics currently casts prices to PHP floats for in-memory statistics; this can lose precision for values beyond 2^53. Database storage remains exact.
 
 ## Testing and Quality
 

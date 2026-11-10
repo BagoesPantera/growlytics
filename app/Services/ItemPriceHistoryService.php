@@ -83,7 +83,7 @@ class ItemPriceHistoryService
                 continue;
             }
 
-            $price = (int) $row->price_wl;
+            $price = (float) $row->price_wl;
             $side = $row->side === 'buy' ? 'buy' : 'sell';
 
             $buckets[$bucketKey][$side]['count']++;
@@ -209,7 +209,7 @@ class ItemPriceHistoryService
         return Carbon::createFromTimestamp($timestamp, 'UTC');
     }
 
-    private function median(array $sorted): ?int
+    private function median(array $sorted): ?float
     {
         $n = count($sorted);
 
@@ -218,16 +218,16 @@ class ItemPriceHistoryService
         }
 
         if ($n % 2 === 1) {
-            return (int) $sorted[(int) ($n / 2)];
+            return (float) $sorted[(int) ($n / 2)];
         }
 
         $left = $sorted[($n / 2) - 1];
         $right = $sorted[$n / 2];
 
-        return (int) round(($left + $right) / 2);
+        return (float) (($left + $right) / 2);
     }
 
-    private function percentile(array $sorted, float $p): ?int
+    private function percentile(array $sorted, float $p): ?float
     {
         $n = count($sorted);
 
@@ -236,7 +236,7 @@ class ItemPriceHistoryService
         }
 
         if ($n === 1) {
-            return (int) $sorted[0];
+            return (float) $sorted[0];
         }
 
         $position = ($n - 1) * $p;
@@ -244,12 +244,12 @@ class ItemPriceHistoryService
         $upper = (int) ceil($position);
 
         if ($lower === $upper) {
-            return (int) $sorted[$lower];
+            return (float) $sorted[$lower];
         }
 
         $weight = $position - $lower;
 
-        return (int) round($sorted[$lower] + ($sorted[$upper] - $sorted[$lower]) * $weight);
+        return (float) ($sorted[$lower] + ($sorted[$upper] - $sorted[$lower]) * $weight);
     }
 
     private function sample(array $points): array
