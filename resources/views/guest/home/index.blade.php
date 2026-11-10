@@ -19,17 +19,52 @@
                     </p>
                 </div>
 
-                <div class="w-full md:w-72">
-                    <label for="item-search" class="text-xs font-medium text-gray-500">Search items (coming soon)</label>
+                <div class="relative w-full md:w-72" x-data="itemSearch()" @click.outside="close()" @keydown="onKeyDown($event)">
+                    <label for="item-search" class="text-xs font-medium text-gray-500">Search items</label>
                     <input
                         id="item-search"
+                        x-ref="input"
+                        x-model="query"
+                        @input="onInput()"
+                        @focus="query.trim().length >= 2 ? open = true : null"
                         type="search"
-                        placeholder="Search items (coming soon)"
-                        disabled
-                        aria-label="Search items (coming soon)"
-                        class="mt-1 w-full rounded-xl border border-[#E4EAF0] bg-gray-50 px-4 py-2 text-sm text-[#172B44] outline-none placeholder:text-gray-400 disabled:cursor-not-allowed"
+                        placeholder="Search items..."
+                        autocomplete="off"
+                        role="combobox"
+                        aria-autocomplete="list"
+                        :aria-expanded="open"
+                        aria-controls="item-search-listbox"
+                        class="mt-1 w-full rounded-xl border border-[#E4EAF0] bg-white px-4 py-2 text-sm text-[#172B44] outline-none placeholder:text-gray-400"
                     >
-                    <p class="mt-1 text-xs text-gray-500">Item search will be available in a future release.</p>
+                    <p class="mt-1 text-xs text-gray-500">Type at least 2 characters. Search is coming from live data.</p>
+
+                    <div
+                        x-show="open"
+                        x-transition
+                        id="item-search-listbox"
+                        x-ref="list"
+                        role="listbox"
+                        class="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-[#E4EAF0] bg-white shadow-lg"
+                    >
+                        <div x-show="loading" class="px-4 py-3 text-sm text-gray-500">Loading...</div>
+                        <div x-show="!loading && error" class="px-4 py-3 text-sm text-red-500">Search failed. Try again.</div>
+                        <div x-show="!loading && !error && searched && results.length === 0" class="px-4 py-3 text-sm text-gray-500">
+                            No items found.
+                        </div>
+                        <template x-for="(item, index) in results" :key="item.id">
+                            <a
+                                :href="item.url"
+                                role="option"
+                                :aria-selected="activeIndex === index"
+                                :data-index="index"
+                                @mouseenter="activeIndex = index"
+                                class="block px-4 py-3 text-sm text-[#172B44] transition hover:bg-[#F7FAFC]"
+                                :class="activeIndex === index ? 'bg-[#FFD93D]/20' : ''"
+                            >
+                                <span x-text="item.name"></span>
+                            </a>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>
