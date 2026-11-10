@@ -9,10 +9,14 @@ use Illuminate\Support\Facades\Cache;
 
 class ItemRecentWorldListingsService
 {
+    public function __construct(
+        private PriceFormatter $priceFormatter = new PriceFormatter,
+    ) {}
+
     public function recent(Item $item, int $page = 1): array
     {
         $page = max(1, $page);
-        $key = 'item-recent-worlds:'.$item->id.':page:'.$page.':v1';
+        $key = 'item-recent-worlds:'.$item->id.':page:'.$page.':v2';
 
         $cached = Cache::remember($key, 60, function () use ($item, $page): array {
             $end = Carbon::now('UTC');
@@ -33,7 +37,8 @@ class ItemRecentWorldListingsService
                 return [
                     'id' => $listing->id,
                     'world' => $listing->world,
-                    'price_wl' => (float) $listing->price_wl,
+                    'price_wl' => (string) $listing->price_wl,
+                    'price_wl_formatted' => $this->priceFormatter->format($listing->price_wl),
                     'posted_at' => Carbon::parse($listing->posted_at, 'UTC')->toIso8601String(),
                     'world_verified' => (bool) $listing->world_verified,
                     'url' => $this->safeUrl($listing->url),

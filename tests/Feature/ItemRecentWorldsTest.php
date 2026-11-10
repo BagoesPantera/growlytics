@@ -55,7 +55,8 @@ class ItemRecentWorldsTest extends TestCase
         $response->assertOk();
         $this->assertCount(1, $response->json('data'));
         $response->assertJsonPath('data.0.world', 'SELLWORLD');
-        $response->assertJsonPath('data.0.price_wl', 30);
+        $response->assertJsonPath('data.0.price_wl', '30.00000000');
+        $response->assertJsonPath('data.0.price_wl_formatted', '30 WL');
     }
 
     public function test_recent_worlds_uses_rolling_24_hour_window(): void
@@ -232,6 +233,6 @@ class ItemRecentWorldsTest extends TestCase
         $second = $this->getJson('/items/'.$item->id.'/recent-worlds')->json();
 
         $this->assertSame($first['period']['start'], $second['period']['start']);
-        $this->assertTrue(Cache::has('item-recent-worlds:'.$item->id.':page:1:v1'));
+        $this->assertTrue(Cache::has('item-recent-worlds:'.$item->id.':page:1:v2'));
     }
 }

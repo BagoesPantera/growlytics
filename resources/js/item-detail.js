@@ -327,7 +327,7 @@ async function loadRecentWorlds(page = 1, append = false) {
 
         const price = document.createElement('p');
         price.className = 'text-sm font-black text-[#172B44]';
-        price.textContent = `${formatNumber(row.price_wl)} WL`;
+        price.textContent = row.price_wl_formatted ?? `${formatNumber(row.price_wl)} WL`;
 
         right.append(price);
 
